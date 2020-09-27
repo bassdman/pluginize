@@ -17,7 +17,7 @@ function addPluginSync(conf, ctx) {
 
         const globals = conf.init(conf, ctx);
 
-        if (globals && !globals._context && typeof globals == 'object') {
+        if (globals && !globals._context && typeof globals == 'object' && !Array.isArray(globals)) {
             for (let key of Object.keys(globals) || {}) {
                 ctx[key] = globals[key];
             }
