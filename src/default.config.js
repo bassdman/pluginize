@@ -1,5 +1,7 @@
 import { InitHooksPlugin } from './plugins/hooks.plugin.js';
 import { ValidateConfigPlugin } from './plugins/validateConfig.plugin.js'
+import { ReturnPlugin } from './plugins/return.plugin.js'
+
 
 const DefaultConfig = {
     name: 'DefaultPlugins',
@@ -10,7 +12,7 @@ const DefaultConfig = {
                 allowKeys: ['keyx']
             } to the config.
 
-            Adds structuredData.on() and structuredData.addHooks() to the interface
+            Adds pluginize.on() and pluginize.addHooks() to the interface
         */
         new ValidateConfigPlugin(),
 
@@ -20,9 +22,14 @@ const DefaultConfig = {
                 addHooks: { foo: 'bar' }
             } to the config.
 
-            Adds structuredData.on() and structuredData.addHooks() to the interface
+            Adds pluginize.on() and pluginize.addHooks() to the interface
         */
         new InitHooksPlugin(),
+
+        /*
+            Adds pluginize.return to the interface
+        */
+        new ReturnPlugin(),
     ]
 }
 

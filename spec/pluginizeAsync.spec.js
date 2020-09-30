@@ -1,5 +1,5 @@
-import { PluginizeAsync } from './generated/index.js';
-import { errorMode } from './generated/throwError.js'
+import { PluginizeAsync } from '../src/index.js';
+import { errorMode } from '../src/helpers/throwError.js'
 
 errorMode('development');
 

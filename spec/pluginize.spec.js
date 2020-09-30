@@ -1,11 +1,11 @@
-import { Pluginize } from './generated/index.js';
-import { errorMode } from './generated/throwError.js';
-import { SyncHook } from './generated/hooks.js';
+import { Pluginize } from '../src/index.js';
+import { errorMode } from '../src/helpers/throwError.js';
+import { SyncHook } from '../src/helpers/hooks.js';
 
 errorMode('development');
 
 
-describe("Pluginize: ", function() {
+describe("Pluginize", function() {
     it("should be typeof function", function() {
         expect(typeof Pluginize).toBe('function')
     });
@@ -22,7 +22,7 @@ describe("Pluginize: ", function() {
 
     it("should throw an error if invalid configattribute xyabc is added", async function() {
         expect(() => {
-            return Pluginize({ xyabc: true });
+            Pluginize({ xyabc: true });
         }).toThrow('config.invalidKey');
     });
 
@@ -119,6 +119,7 @@ describe("Pluginize: ", function() {
     it("should not throw an error with addHook:{xyz} and hook:{xyz}", async function() {
         expect(() => {
             return Pluginize({
+                debug: true,
                 addHooks: {
                     xyz: new SyncHook()
                 },
@@ -132,5 +133,23 @@ describe("Pluginize: ", function() {
         expect(() => {
             return Pluginize({ xyabc: true, desactivateKeyCheck: true });
         }).not.toThrow();
+    });
+
+    it("should not throw an error if config-attribute 'return' is set", async function() {
+        expect(() => {
+            return Pluginize({ return: 'abc' });
+        }).not.toThrow();
+    });
+
+    it("should return'hello world' if config-attribute 'return' is 'helloworld' with context.helloworld = 'hello world'", async function() {
+        const result = Pluginize({
+            return: 'helloworld',
+            init() {
+                return {
+                    helloworld: 'hello world'
+                }
+            }
+        });
+        expect(result).toBe('hello world');
     });
 });
