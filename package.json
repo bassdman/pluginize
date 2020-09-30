@@ -3,10 +3,8 @@
     "version": "0.1.0",
     "description": "Visualize  and modify all kinds of data",
     "main": "src/index.js",
-    "type": "module",
     "scripts": {
-        "pretest": "npm run build",
-        "test": "jasmine",
+        "test": "karma start",
         "build": "rollup --config",
         "deploy": "node ./src/index.js",
         "testdeploy": "node ./dest/index.js"
@@ -26,10 +24,10 @@
     },
     "homepage": "https://github.com/bassdman/pluginize#readme",
     "devDependencies": {
-        "@rollup/plugin-commonjs": "^15.1.0",
-        "@rollup/plugin-node-resolve": "^9.0.0",
-        "jasmine": "^3.6.1",
-        "rollup": "^2.28.2"
+        "@babel/plugin-transform-runtime": "^7.11.5",
+        "webpack": "^4.44.2",
+        "webpack-cli": "^3.3.12",
+        "webpack-karma-jasmine": "^4.0.0"
     },
     "dependencies": {
         "deepmerge": "^4.2.2"
