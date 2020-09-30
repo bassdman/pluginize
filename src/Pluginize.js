@@ -64,8 +64,9 @@ function PluginizeSync(config = {}) {
     ctx.log('Starting Pluginize.')
     addPluginSync(DefaultPlugin, ctx);
 
-    if (PluginizeSync.factoryApply) {
-        addPluginSync(PluginizeSync.factoryApply, ctx);
+    if (PluginizeSync.pluginsToApply) {
+        for (let pluginToApply of PluginizeSync.pluginsToApply)
+            addPluginSync(pluginToApply, ctx);
     }
 
 
