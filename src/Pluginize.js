@@ -1,5 +1,5 @@
 import { DefaultConfig as DefaultPlugin } from './default.config.js';
-import { SyncHook } from './helpers/hooks.js';
+import { SyncHook } from 'tapable';
 import { throwErrorIf, errorMode } from './helpers/throwError.js';
 
 function addPluginSync(conf, ctx) {
@@ -40,20 +40,23 @@ function addPluginSync(conf, ctx) {
 }
 
 function PluginizeSync(config = {}) {
+
     let ctx = {
         plugins: [],
         config,
         _context: true,
         addPlugin: addPluginSync,
         hooks: {
-            pluginsInitialized: new SyncHook(),
-            initPlugin: new SyncHook(),
+            pluginsInitialized: new SyncHook(['context']),
+            initPlugin: new SyncHook(['plugin', 'context']),
         },
         log() {
             if (config.debug)
                 console.log(...arguments);
         }
     };
+
+
 
     if (config.debug)
         errorMode('development');

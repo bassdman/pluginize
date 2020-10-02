@@ -1,5 +1,5 @@
 import { DefaultConfig as DefaultPlugin } from './default.config.js';
-import { AsyncHook } from './helpers/hooks.js';
+import { AsyncSeriesHook } from 'tapable';
 import { throwErrorIf, errorMode } from './helpers/throwError.js';
 
 async function addPluginAsync(conf, ctx) {
@@ -43,8 +43,8 @@ async function PluginizeAsync(config = {}) {
         _context: true,
         addPlugin: addPluginAsync,
         hooks: {
-            pluginsInitialized: new AsyncHook(),
-            initPlugin: new AsyncHook(),
+            pluginsInitialized: new AsyncSeriesHook(['context']),
+            initPlugin: new AsyncSeriesHook(['plugin', 'context']),
         }
     };
 
@@ -58,10 +58,10 @@ async function PluginizeAsync(config = {}) {
     await addPluginAsync(config, ctx);
 
     for (let _plugin of ctx.plugins) {
-        await ctx.hooks.initPlugin.call(_plugin, ctx);
+        await ctx.hooks.initPlugin.promise(_plugin, ctx);
     }
 
-    await ctx.hooks.pluginsInitialized.call(ctx);
+    await ctx.hooks.pluginsInitialized.promise(ctx);
 
     if (config.return)
         return ctx[config.return];

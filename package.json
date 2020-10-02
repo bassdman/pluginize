@@ -30,6 +30,6 @@
         "webpack-karma-jasmine": "^4.0.0"
     },
     "dependencies": {
-        "deepmerge": "^4.2.2"
+        "tapable": "^2.0.0"
     }
 }

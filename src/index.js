@@ -1,12 +1,11 @@
 import { PluginizeSync as PluginizeSyncInstance, PluginizeSync } from './Pluginize';
 import { PluginizeAsync as PluginizeAsyncInstance } from './PluginizeAsync';
 
-function Instance(config) {
-    let instance = PluginizeSyncInstance;
+function instance(config = {}) {
+    let instance = config.async ? PluginizeAsyncInstance : PluginizeSyncInstance;
 
-
-    if (config) {
-        let configsAsArray = Array.isArray(config) ? config : [config];
+    if (config.apply) {
+        let configsAsArray = Array.isArray(config.apply) ? config.apply : [config.apply];
         configsAsArray = configsAsArray.map(entry => { entry.name = entry.name || 'Instance(config)'; return entry; })
 
         console.log(configsAsArray)
@@ -16,20 +15,7 @@ function Instance(config) {
     return instance;
 }
 
-function InstanceAsync(config = {}) {
-    let instance = PluginizeAsyncInstance;
+const Pluginize = instance();
+const PluginizeAsync = instance({ async: true });
 
-    if (config) {
-        let configsAsArray = Array.isArray(config) ? config : [config];
-        configsAsArray = configsAsArray.map(entry => { entry.name = entry.name || 'InstanceAsync(config)'; return entry; })
-
-        instance.pluginsToApply = configsAsArray;
-    }
-
-    return instance;
-}
-
-const Pluginize = Instance();
-const PluginizeAsync = InstanceAsync();
-
-export { Pluginize, PluginizeAsync, Instance, InstanceAsync }
+export { Pluginize, PluginizeAsync, instance }

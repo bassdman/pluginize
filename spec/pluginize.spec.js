@@ -1,6 +1,6 @@
 import { Pluginize } from '../src/index.js';
 import { errorMode } from '../src/helpers/throwError.js';
-import { SyncHook } from '../src/helpers/hooks.js';
+import { SyncHook } from 'tapable';
 
 errorMode('development');
 
