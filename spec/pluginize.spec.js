@@ -10,43 +10,43 @@ describe("Pluginize(config)", function() {
         expect(typeof Pluginize).toBe('function')
     });
 
-    it("should return an object if called without parameter", async function() {
+    it("should return an object if called without parameter", function() {
         const result = Pluginize();
         expect(typeof result).toBe('object');
     });
 
-    it("should return an object if called with an object", async function() {
+    it("should return an object if called with an object", function() {
         const result = Pluginize({});
         expect(typeof result).toBe('object');
     });
 
-    it("should throw an error if invalid configattribute xyabc is added", async function() {
+    it("should throw an error if invalid configattribute xyabc is added", function() {
         expect(() => {
             Pluginize({ xyabc: true });
         }).toThrow('config.invalidKey');
     });
 
-    it("should not throw an error for attribute plugins as an array", async function() {
+    it("should not throw an error for attribute plugins as an array", function() {
         expect(() => {
             return Pluginize({ plugins: [] });
         }).not.toThrow();
     });
-    it("should throw an error for attribute plugins if it is not an array", async function() {
+    it("should throw an error for attribute plugins if it is not an array", function() {
         expect(() => {
             return Pluginize({ plugins: {} });
         }).toThrow('config.plugin.wrongtype');
     });
-    it("should not throw an error for attribute init", async function() {
+    it("should not throw an error for attribute init", function() {
         expect(() => {
             return Pluginize({ init: function() {} });
         }).not.toThrow();
     });
-    it("should throw an error for attribute init if it is not a function", async function() {
+    it("should throw an error for attribute init if it is not a function", function() {
         expect(() => {
             return Pluginize({ init: {} });
         }).toThrow('config.init.wrongtype');
     });
-    it("should add function xy to the context if it is returend in initfunction", async function() {
+    it("should add function xy to the context if it is returend in initfunction", function() {
         const result = Pluginize({
             init: function() {
                 return {
@@ -56,7 +56,7 @@ describe("Pluginize(config)", function() {
         });
         expect(typeof result.abc).toBe('function');
     });
-    it("should ignore other return types then object for init function", async function() {
+    it("should ignore other return types then object for init function", function() {
 
         expect(() => {
             Pluginize({
@@ -66,20 +66,17 @@ describe("Pluginize(config)", function() {
             });
         }).not.toThrow();
     });
-
-
-    //noch nicht in async
-    it("should be valid to add a config attribute called 'hooks' = {}", async function() {
+    it("should be valid to add a config attribute called 'hooks' = {}", function() {
         expect(() => {
             return Pluginize({ hooks: {} });
         }).not.toThrow();
     });
-    it("should throw an error if config attribute 'hooks' is not an object", async function() {
+    it("should throw an error if config attribute 'hooks' is not an object", function() {
         expect(() => {
             return Pluginize({ hooks: [] });
         }).toThrow('config.hooks.wrongtype');
     });
-    it("should throw an error if hooks named 'xyz' does not exist", async function() {
+    it("should throw an error if hooks named 'xyz' does not exist", function() {
         expect(() => {
             return Pluginize({
                 hooks: {
@@ -88,7 +85,7 @@ describe("Pluginize(config)", function() {
             });
         }).toThrow('config.hooks.notDefined');
     });
-    it("should have a hook called 'initPlugin'", async function() {
+    it("should have a hook called 'initPlugin'", function() {
         expect(() => {
             return Pluginize({
                 hooks: {
@@ -97,7 +94,7 @@ describe("Pluginize(config)", function() {
             });
         }).not.toThrow();
     });
-    it("should have a hook called 'pluginsInitialized'", async function() {
+    it("should have a hook called 'pluginsInitialized'", function() {
         expect(() => {
             return Pluginize({
                 hooks: {
@@ -106,17 +103,17 @@ describe("Pluginize(config)", function() {
             });
         }).not.toThrow();
     });
-    it("should be valid to add a config attribute called 'addHooks' = {}", async function() {
+    it("should be valid to add a config attribute called 'addHooks' = {}", function() {
         expect(() => {
             return Pluginize({ addHooks: {} });
         }).not.toThrow();
     });
-    it("should throw an error if config attribute 'addHooks' is not an object", async function() {
+    it("should throw an error if config attribute 'addHooks' is not an object", function() {
         expect(() => {
             return Pluginize({ addHooks: [] });
         }).toThrow('config.addHooks.wrongtype');
     });
-    it("should not throw an error with addHook:{xyz} and hook:{xyz}", async function() {
+    it("should not throw an error with addHook:{xyz} and hook:{xyz}", function() {
         expect(() => {
             return Pluginize({
                 debug: true,
@@ -129,25 +126,25 @@ describe("Pluginize(config)", function() {
             });
         }).not.toThrow();
     });
-    it("should not throw an error if invalid configattribute xyabc is added and config.desactivateKeyCheck == true", async function() {
+    it("should not throw an error if invalid configattribute xyabc is added and config.desactivateKeyCheck == true", function() {
         expect(() => {
             return Pluginize({ xyabc: true, desactivateKeyCheck: true });
         }).not.toThrow();
     });
 
-    it("should have a function desactivateKeyCheck in context", async function() {
+    it("should have a function desactivateKeyCheck in context", function() {
         const result = Pluginize();
 
         expect(result.desactivateKeyCheck).toBeDefined();
     });
 
-    it("should not throw an error if config-attribute 'return' is set", async function() {
+    it("should not throw an error if config-attribute 'return' is set", function() {
         expect(() => {
             return Pluginize({ return: 'abc' });
         }).not.toThrow();
     });
 
-    it("should return'hello world' if config-attribute 'return' is 'helloworld' with context.helloworld = 'hello world'", async function() {
+    it("should return'hello world' if config-attribute 'return' is 'helloworld' with context.helloworld = 'hello world'", function() {
         const result = Pluginize({
             return: 'helloworld',
             init() {
@@ -223,10 +220,8 @@ describe("Pluginize(config)", function() {
                     },
                 },
             });
-            console.log(result.config)
 
             expect(result.config.plugins[0].name).toEqual('default');
         });
     });
-
 });

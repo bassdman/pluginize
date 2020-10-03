@@ -30,7 +30,7 @@ function instance(configInstance = {}) {
 
             if (globals && !globals._context && typeof globals == 'object' && !Array.isArray(globals)) {
                 for (let key of Object.keys(globals) || {}) {
-                    ctx.log('- add ' + key + ' to global context.')
+                    ctx.log('- add ' + key + ' to global context.');
                     ctx[key] = globals[key];
                 }
             }
@@ -91,7 +91,6 @@ function instance(configInstance = {}) {
 
 
         for (let _plugin of ctx.plugins) {
-            console.log('das plugin hat wert', _plugin)
             throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.changeConfig.returnNull");
             throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.changeConfig.wrongType");
 
