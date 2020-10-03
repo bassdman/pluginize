@@ -5,7 +5,7 @@ import { SyncHook } from 'tapable';
 errorMode('development');
 
 
-describe("Pluginize", function() {
+describe("Pluginize(config)", function() {
     it("should be typeof function", function() {
         expect(typeof Pluginize).toBe('function')
     });
@@ -135,6 +135,12 @@ describe("Pluginize", function() {
         }).not.toThrow();
     });
 
+    it("should have a function desactivateKeyCheck in context", async function() {
+        const result = Pluginize();
+
+        expect(result.desactivateKeyCheck).toBeDefined();
+    });
+
     it("should not throw an error if config-attribute 'return' is set", async function() {
         expect(() => {
             return Pluginize({ return: 'abc' });
@@ -152,4 +158,75 @@ describe("Pluginize", function() {
         });
         expect(result).toBe('hello world');
     });
+
+
+    describe('config.hooks.preInitPlugin', function() {
+        it("should have a hook 'preInitPlugin'", function() {
+            const result = Pluginize();
+
+            expect(result.hooks.preInitPlugin).toBeDefined();
+        });
+
+        it("should be called before 'initPlugin'", function() {
+            const order = [];
+            Pluginize({
+                hooks: {
+                    preInitPlugin() {
+                        if (!order.includes('preInitPlugin'))
+                            order.push('preInitPlugin');
+                    },
+                    initPlugin() {
+                        if (!order.includes('initPlugin'))
+                            order.push('initPlugin');
+                    }
+                }
+            });
+
+            expect(order).toEqual(['preInitPlugin', 'initPlugin']);
+        });
+
+        it("should change the config attribute _test to 'test' when it is changed", function() {
+            const result = Pluginize({
+                _test: true,
+                hooks: {
+                    preInitPlugin(config) {
+                        config.test = config._test;
+                        delete config._test;
+                    },
+                },
+                allowKeys: ['test']
+            });
+
+            expect(result.config.test).toEqual(true);
+            expect(result.config._test).toBeUndefined();
+        });
+
+        it("should throw an error for an empty plugin without a name", function() {
+            expect(() => {
+                Pluginize({
+                    plugins: [{
+
+                    }],
+                });
+            }).toThrow('plugin.noName');
+        });
+
+        it("should add name = 'default' to the config of an empty plugin", function() {
+            const result = Pluginize({
+                plugins: [{
+
+                }],
+                hooks: {
+                    preInitPlugin(config) {
+                        if (!config.name)
+                            config.name = 'default';
+                    },
+                },
+            });
+            console.log(result.config)
+
+            expect(result.config.plugins[0].name).toEqual('default');
+        });
+    });
+
 });

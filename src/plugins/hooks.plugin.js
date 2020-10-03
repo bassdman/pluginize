@@ -25,6 +25,9 @@ function InitHooksPlugin(ctx) {
             }
         },
         init: function(conf, ctx) {
+            if (ctx.config.hooks && ctx.config.hooks.preInitPlugin)
+                ctx.hooks.preInitPlugin.tap('preInitPlugin', ctx.config.hooks.preInitPlugin);
+
             return {
                 addHooks: function(obj) {
                     for (let key of Object.keys(obj)) {

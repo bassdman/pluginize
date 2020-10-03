@@ -1,5 +1,5 @@
 import { DefaultConfig as DefaultPlugin } from './default.config.js';
-import { AsyncSeriesHook } from 'tapable';
+import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
 import { throwErrorIf, errorMode } from './helpers/throwError.js';
 
 async function addPluginAsync(conf, ctx) {
@@ -43,10 +43,17 @@ async function PluginizeAsync(config = {}) {
         _context: true,
         addPlugin: addPluginAsync,
         hooks: {
+            changeConfig: new AsyncSeriesWaterfallHook(['config', 'context']),
             pluginsInitialized: new AsyncSeriesHook(['context']),
             initPlugin: new AsyncSeriesHook(['plugin', 'context']),
         }
     };
+
+    if (PluginizeAsync.changeConfig)
+        ctx.hooks.changeConfig.tap('ChangeConfig-Root', PluginizeAsync.changeConfig);
+
+    config = await ctx.hooks.changeConfig.promise(config, ctx);
+
 
     if (config.debug)
         errorMode('development');
@@ -58,6 +65,7 @@ async function PluginizeAsync(config = {}) {
     await addPluginAsync(config, ctx);
 
     for (let _plugin of ctx.plugins) {
+        _plugin = await ctx.hooks.changeConfig.promise(_plugin, ctx);
         await ctx.hooks.initPlugin.promise(_plugin, ctx);
     }
 

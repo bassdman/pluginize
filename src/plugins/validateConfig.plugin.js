@@ -27,8 +27,15 @@ function ValidateConfigPlugin() {
                             You want to allow another config attributes? Add allowKeys:['yourkeyname'].`, 'config.invalidKey')
                     }
                 }
-            }
+            },
         },
+        init() {
+            return {
+                desactivateKeyCheck() {
+                    desactivateKeyCheck = true;
+                }
+            }
+        }
     }
 }
 
