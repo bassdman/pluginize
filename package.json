@@ -5,7 +5,7 @@
     "main": "src/index.js",
     "scripts": {
         "test": "karma start",
-        "build": "rollup --config",
+        "build": "webpack",
         "deploy": "node ./src/index.js",
         "testdeploy": "node ./dest/index.js"
     },
@@ -24,7 +24,10 @@
     },
     "homepage": "https://github.com/bassdman/pluginize#readme",
     "devDependencies": {
+        "@babel/core": "^7.11.6",
         "@babel/plugin-transform-runtime": "^7.11.5",
+        "@babel/preset-env": "^7.11.5",
+        "babel-loader": "^8.1.0",
         "webpack": "^4.44.2",
         "webpack-cli": "^3.3.12",
         "webpack-karma-jasmine": "^4.0.0"
