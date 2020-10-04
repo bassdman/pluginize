@@ -5,14 +5,18 @@ module.exports = [{
     mode: 'development',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'pluginize.js'
-    }
+        filename: 'pluginize.js',
+        library: 'Pluginize'
+    },
 }, {
     entry: './src/index.js',
     mode: 'production',
+    devtool: 'eval-source-map',
+
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'pluginize.min.js',
+        library: 'Pluginize',
     },
     module: {
         rules: [{
