@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = [{
     entry: './src/index.js',
@@ -6,18 +7,25 @@ module.exports = [{
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'pluginize.js',
-        library: 'Pluginize'
+        library: 'pluginize'
     },
 }, {
     entry: './src/index.js',
     mode: 'production',
-    devtool: 'eval-source-map',
+    //   devtool: 'eval-source-map',
 
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'pluginize.min.js',
-        library: 'Pluginize',
+        library: 'pluginize',
+        libraryTarget: 'amd',
+        libraryExport: 'default'
     },
+    plugins: [
+        new webpack.ProvidePlugin({
+            pluginize2: 'pluginize.pluginize',
+        })
+    ],
     module: {
         rules: [{
             test: /\.m?js$/,
@@ -29,6 +37,6 @@ module.exports = [{
                     plugins: ['@babel/plugin-proposal-object-rest-spread']
                 }
             }
-        }]
+        }, ]
     }
 }];

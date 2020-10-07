@@ -3,7 +3,7 @@ import { errorMode } from '../src/helpers/throwError.js';
 
 errorMode('development');
 
-describe("Pluginize.create", function() {
+describe("pluginize(config)", function() {
     it("should be typeof function", function() {
         expect(typeof pluginize).toBe('function');
     });
@@ -16,7 +16,7 @@ describe("Pluginize.create", function() {
         expect(pluginize().applySync).toBeDefined();
     });
 
-    it("should return 'hello world' if Pluginize.create initializes it and pluginize() is called without parameter", function() {
+    it("should return 'hello world' if pluginize(config) initializes it and applySync() is called without parameter", function() {
         const result = pluginize({
             return: 'helloworld',
             init() {
@@ -29,7 +29,7 @@ describe("Pluginize.create", function() {
         expect(result).toBe('hello world');
     });
 
-    it("should return 'hello world' in key 'hw1' and 'hw2' when create is called with array of configs", function() {
+    it("should return 'hello world' in key 'hw1' and 'hw2' when pluginize() is called with array of configs", function() {
         const result = pluginize(
             [{
                 init() {
