@@ -223,12 +223,17 @@ class AsyncWaterfallHook extends Hook {
 
 function applyFactory(configsFromInstance, configInstance) {
     async function addPluginAsync(conf, ctx) {
+
         ctx.log('- Add plugin "' + conf.name + '"');
-        conf = await ctx.hooks.preInitPlugin.promise(conf, ctx);
+
+        conf = await ctx.hooks.preInitPlugin.promise(conf, ctx) || conf;
+
         throwErrorIf(!conf.name, `Plugin ${JSON.stringify(conf)} has no name. Please define a name by adding an attribute name:"pluginname" to your plugin.`, 'plugin.noName');
         throwErrorIf(typeof conf === 'function', `Plugin ${conf.name} is a function, but should be a configuration object. Did you forget calling it? (eg: PluginName())`, 'plugin.isFunction');
         throwErrorIf(typeof conf !== 'object' || Array.isArray(conf), `Plugin ${conf.name} should be a configuration of type object, but is typeof ${typeof conf}.`, 'plugin.wrongType');
+
         ctx.plugins.push(conf);
+
         if (conf.init) {
             throwErrorIf(typeof conf.init !== 'function', `Error in plugin "${conf.name}": config.init must be a function but is a ${typeof conf.init}`, 'config.init.wrongtype');
             ctx.log(`- Execute init() function of plugin ${conf.name}`);
@@ -240,10 +245,13 @@ function applyFactory(configsFromInstance, configInstance) {
                 }
             }
         }
+
         if (conf.hooks && conf.hooks.initPlugin) {
             await ctx.hooks.initPlugin.tap(conf.name, conf.hooks.initPlugin);
         }
+
         throwErrorIf(conf.plugins && !Array.isArray(conf.plugins), `Error in plugin "${conf.name}": config.plugin must be an array but is an ${typeof conf.plugins}`, 'config.plugin.wrongtype');
+
         for (let _plugin of conf.plugins || []) {
             await addPluginAsync(_plugin, ctx);
         }
@@ -310,10 +318,12 @@ function applyFactory(configsFromInstance, configInstance) {
 
 function applySyncFactory(configsFromInstance, configInstance) {
     function addPluginSync(conf, ctx) {
+
         ctx.log('- Add plugin "' + conf.name + '"');
 
-        conf = ctx.hooks.preInitPlugin.call(conf, ctx);
+        conf = ctx.hooks.preInitPlugin.call(conf, ctx) || conf;
 
+        throwErrorIf(conf == null, `Error: Plugin is null`, 'conf.isNull');
         throwErrorIf(!conf.name, `Plugin ${JSON.stringify(conf)} has no name. Please define a name by adding an attribute name:"pluginname" to your plugin.`, 'plugin.noName');
         throwErrorIf(typeof conf === 'function', `Plugin ${conf.name} is a function, but should be a configuration object. Did you forget calling it? (eg: PluginName())`, 'plugin.isFunction');
         throwErrorIf(typeof conf !== 'object' || Array.isArray(conf), `Plugin ${conf.name} should be a configuration of type object, but is typeof ${typeof conf}.`, 'plugin.wrongType');
@@ -368,7 +378,6 @@ function applySyncFactory(configsFromInstance, configInstance) {
 
         if (configInstance.changeConfig)
             config = configInstance.changeConfig(config, ctx);
-
         throwErrorIf(config == null, "error in pluginize(config): config.changeConfig returns null but should return an object (the modified config)", "config.changeConfig.returnNull");
         throwErrorIf(Array.isArray(config) || typeof config !== 'object', "error in pluginize(config): config.changeConfig returns a " + typeof config.changeConfig + " but should return an object (the modified config)", "config.changeConfig.wrongType");
 
