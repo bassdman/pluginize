@@ -4,8 +4,6 @@ import { ReturnPlugin } from './plugins/return.plugin.js'
 import { RenamePlugin } from './plugins/rename.plugin.js'
 import { DeletePlugin } from './plugins/delete.plugin.js'
 
-console.log('deleteplugin', DeletePlugin)
-
 const DefaultConfig = {
     name: 'DefaultPlugins',
     plugins: [

@@ -50,27 +50,46 @@ describe("pluginize(config)", function() {
     });
 
     it("should throw an error if config.changeConfig returns undefined", function() {
-
         expect(() => {
-            pluginize({
-                changeConfig: function(config, ctx) {
+            pluginize({}, {
+                changeConfig: function(config) {
 
                 }
             }).applySync();
-        }).toThrow('config.changeConfig.returnNull');
+        }).toThrow('factoryConfig.changeConfig.isNull');
+    });
+
+    it("should throw an error if config.changeConfig returns a number", function() {
+        expect(() => {
+            pluginize({}, {
+                changeConfig: function(config) {
+                    return 5;
+                }
+            }).applySync();
+        }).toThrow('factoryConfig.changeConfig.wrongType');
+    });
+
+    it("should throw an error if config.changeConfig returns an Array", function() {
+        expect(() => {
+            pluginize({}, {
+                changeConfig: function(config) {
+                    return [];
+                }
+            }).applySync();
+        }).toThrow('factoryConfig.changeConfig.wrongTypeArray');
     });
 
     it("should add config.test in the configattributes when config.changeConfig added this", function() {
         const result = pluginize({
-            changeConfig: function(config, ctx) {
+            //  allowKeys: ['test']
+        }, {
+            changeConfig: function(config) {
                 config.test = config._test;
                 delete config._test;
 
-
                 return config;
             },
-            allowKeys: ['test']
-        }, ).applySync({ _test: true });
+        }, ).applySync({ _test: true, allowKeys: ['test'] });
         expect(result.config.test).toBeDefined();
     });
 });

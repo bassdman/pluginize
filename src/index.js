@@ -1,19 +1,25 @@
 import { applyFactory } from './apply';
 import { applySyncFactory } from './applySync';
+import { throwErrorIf, errorMode } from './helpers/throwError.js';
 import { SyncHook, AsyncHook, SyncWaterfallHook, AsyncWaterfallHook, SyncBreakableHook, AsyncBreakableHook } from './helpers/hooks.js';
 
-function pluginize(configInstance = {}) {
-    const configsFromInstance = [];
+function pluginize(configInstance = {}, factoryConfig = {}) {
+    Object.assign(factoryConfig, {
+        configs: []
+    });
 
     let configsAsArray = Array.isArray(configInstance) ? configInstance : [configInstance];
-    configsAsArray = configsAsArray.map(entry => { entry.name = entry.name || 'pluginize(config)'; return entry; })
+    configsAsArray = configsAsArray.map(entry => {
+        entry.name = entry.name || 'pluginize(config)';
 
-    configsFromInstance.push(...configsAsArray);
+        return entry;
+    })
 
 
+    factoryConfig.configs.push(...configsAsArray);
 
-    const apply = applyFactory(configsFromInstance, configInstance);
-    const applySync = applySyncFactory(configsFromInstance, configInstance);
+    const apply = applyFactory(factoryConfig);
+    const applySync = applySyncFactory(factoryConfig);
 
     return { apply, applySync };
 }

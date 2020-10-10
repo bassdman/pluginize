@@ -2,7 +2,7 @@ import { DefaultConfig as DefaultPlugin } from './default.config.js';
 import { AsyncHook, AsyncWaterfallHook } from './helpers/hooks.js';
 import { throwErrorIf, errorMode } from './helpers/throwError.js';
 
-function applyFactory(configsFromInstance, configInstance) {
+function applyFactory(factoryConfig) {
     async function addPluginAsync(conf, ctx) {
 
         ctx.log('- Add plugin "' + conf.name + '"');
@@ -57,11 +57,12 @@ function applyFactory(configsFromInstance, configInstance) {
             }
         };
 
-        if (configInstance.changeConfig)
-            config = await configInstance.changeConfig(config, ctx);
+        if (factoryConfig.changeConfig)
+            config = await factoryConfig.changeConfig(config, ctx);
 
-        throwErrorIf(config == null, "error in pluginize(config): config.changeConfig returns null but should return an object (the modified config)", "config.changeConfig.returnNull");
-        throwErrorIf(Array.isArray(config) || typeof config !== 'object', "error in pluginize(config): config.changeConfig returns a " + typeof config.changeConfig + " but should return an object (the modified config)", "config.changeConfig.wrongType");
+        throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns null but should return the modified config.', 'factoryConfig.changeConfig.isNull')
+        throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.changeConfig.wrongType')
+        throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns an Array but should return an object.', 'factoryConfig.changeConfig.wrongTypeArray')
 
 
         if (config.debug)
@@ -73,7 +74,7 @@ function applyFactory(configsFromInstance, configInstance) {
         ctx.log('Starting Pluginize.')
         await addPluginAsync(DefaultPlugin, ctx);
 
-        for (let pluginToApply of configsFromInstance)
+        for (let pluginToApply of factoryConfig.configs)
             await addPluginAsync(pluginToApply, ctx);
 
         await addPluginAsync(config, ctx);
