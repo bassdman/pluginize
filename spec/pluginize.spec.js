@@ -80,9 +80,7 @@ describe("pluginize(config)", function() {
     });
 
     it("should add config.test in the configattributes when config.changeConfig added this", function() {
-        const result = pluginize({
-            //  allowKeys: ['test']
-        }, {
+        const result = pluginize({}, {
             changeConfig: function(config) {
                 config.test = config._test;
                 delete config._test;
@@ -91,5 +89,55 @@ describe("pluginize(config)", function() {
             },
         }, ).applySync({ _test: true, allowKeys: ['test'] });
         expect(result.config.test).toBeDefined();
+    });
+
+    it("should throw an error if a factoryConfig.plugins is a number", function() {
+        expect(() => {
+            const result = pluginize({}, {
+                plugins: 5
+            }, ).applySync();
+        }).toThrow('factoryConfig.plugins.wrongType');
+    });
+
+    it("should throw an error if a factoryConfig.plugins is a number", function() {
+        expect(() => {
+            const result = pluginize({}, {
+                plugins: [5]
+            }, ).applySync();
+        }).toThrow('factoryConfig.plugins.plugin.wrongType');
+    });
+
+    it("should throw an error if a factoryConfig.plugins is a number", function() {
+        expect(() => {
+            const result = pluginize({}, {
+                plugins: [{ abc: true }]
+            }, ).applySync();
+        }).toThrow('factoryConfig.plugins.plugin.wrongkey');
+    });
+
+    it("should throw an error if a factoryConfig.plugins is a number", function() {
+        expect(() => {
+            pluginize({}, {
+                plugins: [{ resolve: true }]
+            }, ).applySync();
+        }).toThrow('factoryConfig.plugins.plugin.wrongkeytype');
+    });
+
+    it("should call plugin.init when a plugin uses an init function", function() {
+        const init = jasmine.createSpy('init');
+        pluginize({}, {
+            plugins: [{ init }]
+        }, ).applySync();
+
+        expect(init).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call plugin.init when a plugin uses an init function", function() {
+        const resolve = jasmine.createSpy('resolve');
+        pluginize({}, {
+            plugins: [{ resolve }]
+        }, ).applySync();
+
+        expect(resolve).toHaveBeenCalledTimes(1);
     });
 });
