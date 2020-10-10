@@ -116,6 +116,56 @@ function ReturnPlugin() {
     }
 }
 
+function RenamePlugin() {
+    const renamed = {};
+    return {
+        allowKeys: ['rename'],
+        name: 'RenamePlugin',
+        hooks: {
+            initPlugin(config, ctx) {
+                if (config.rename) {
+                    let newKey, oldKey;
+                    for (oldKey of Object.keys(config.rename)) {
+                        newKey = config.rename[oldKey];
+
+                        renamed[oldKey] = newKey;
+                    }
+                }
+            },
+            return (ctx) {
+                let newKey, oldKey;
+                for (oldKey of Object.keys(renamed)) {
+                    newKey = renamed[oldKey];
+
+                    ctx[newKey] = ctx[oldKey];
+                    delete ctx[oldKey];
+                }
+            },
+        },
+    }
+}
+
+function DeletePlugin() {
+    const toDelete = [];
+    return {
+        allowKeys: ['delete'],
+        name: 'DeletePlugin',
+        hooks: {
+            initPlugin(config, ctx) {
+                if (config.delete) {
+                    toDelete.push(...config.delete);
+                }
+            },
+            return (ctx) {
+                for (let key of toDelete) {
+
+                    delete ctx[key];
+                }
+            },
+        },
+    }
+}
+
 const DefaultConfig = {
     name: 'DefaultPlugins',
     plugins: [
@@ -143,6 +193,20 @@ const DefaultConfig = {
             Adds pluginize.return to the interface
         */
         new ReturnPlugin(),
+
+        /*
+            Enables adding {
+                rename: { foo: 'bar' },
+            } to the config.
+        */
+        new RenamePlugin(),
+
+        /*
+            Enables adding {
+                delete: ['foo','bar'],
+            } to the config.
+        */
+        new DeletePlugin()
     ]
 };
 
@@ -217,7 +281,31 @@ class AsyncWaterfallHook extends Hook {
     }
 }
 
-function applyFactory(configsFromInstance, configInstance) {
+class SyncBreakableHook extends Hook {
+    call(ctx) {
+        const events = this.listeners();
+
+        for (let event of events) {
+            const result = event(...arguments);
+            if (!result)
+                return;
+        }
+    }
+}
+
+class AsyncBreakableHook extends Hook {
+    async call(ctx) {
+        const events = this.listeners();
+
+        for (let event of events) {
+            const result = await event(...arguments);
+            if (!result)
+                return;
+        }
+    }
+}
+
+function applyFactory(factoryConfig) {
     async function addPluginAsync(conf, ctx) {
 
         ctx.log('- Add plugin "' + conf.name + '"');
@@ -261,6 +349,7 @@ function applyFactory(configsFromInstance, configInstance) {
             _context: true,
             addPlugin: addPluginAsync,
             hooks: {
+                return: new AsyncHook(['context']),
                 preInitPlugin: new AsyncWaterfallHook(['config', 'context']),
                 pluginsInitialized: new AsyncHook(['context']),
                 initPlugin: new AsyncHook(['plugin', 'context']),
@@ -271,11 +360,12 @@ function applyFactory(configsFromInstance, configInstance) {
             }
         };
 
-        if (configInstance.changeConfig)
-            config = await configInstance.changeConfig(config, ctx);
+        if (factoryConfig.changeConfig)
+            config = await factoryConfig.changeConfig(config, ctx);
 
-        throwErrorIf(config == null, "error in pluginize(config): config.changeConfig returns null but should return an object (the modified config)", "config.changeConfig.returnNull");
-        throwErrorIf(Array.isArray(config) || typeof config !== 'object', "error in pluginize(config): config.changeConfig returns a " + typeof config.changeConfig + " but should return an object (the modified config)", "config.changeConfig.wrongType");
+        throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns null but should return the modified config.', 'factoryConfig.changeConfig.isNull');
+        throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.changeConfig.wrongType');
+        throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns an Array but should return an object.', 'factoryConfig.changeConfig.wrongTypeArray');
 
 
         if (config.debug)
@@ -287,7 +377,7 @@ function applyFactory(configsFromInstance, configInstance) {
         ctx.log('Starting Pluginize.');
         await addPluginAsync(DefaultConfig, ctx);
 
-        for (let pluginToApply of configsFromInstance)
+        for (let pluginToApply of factoryConfig.configs)
             await addPluginAsync(pluginToApply, ctx);
 
         await addPluginAsync(config, ctx);
@@ -305,6 +395,8 @@ function applyFactory(configsFromInstance, configInstance) {
         ctx.log('- call hook "pluginsInitialized"');
         await ctx.hooks.pluginsInitialized.promise(ctx);
 
+        await ctx.hooks.return.promise(ctx);
+
         if (ctx.return) {
             return ctx[ctx.return];
         } else
@@ -312,7 +404,7 @@ function applyFactory(configsFromInstance, configInstance) {
     }
 }
 
-function applySyncFactory(configsFromInstance, configInstance) {
+function applySyncFactory(factoryConfig) {
     function addPluginSync(conf, ctx) {
 
         ctx.log('- Add plugin "' + conf.name + '"');
@@ -355,13 +447,13 @@ function applySyncFactory(configsFromInstance, configInstance) {
     }
 
     return function applySync(config = {}) {
-        console.log('start applysync');
         let ctx = {
             plugins: [],
             config,
             _context: true,
             addPlugin: addPluginSync,
             hooks: {
+                return: new SyncHook(['context']),
                 preInitPlugin: new SyncWaterfallHook(['config', 'context']),
                 pluginsInitialized: new SyncHook(['context']),
                 initPlugin: new SyncHook(['plugin', 'context']),
@@ -372,10 +464,12 @@ function applySyncFactory(configsFromInstance, configInstance) {
             }
         };
 
-        if (configInstance.changeConfig)
-            config = configInstance.changeConfig(config, ctx);
-        throwErrorIf(config == null, "error in pluginize(config): config.changeConfig returns null but should return an object (the modified config)", "config.changeConfig.returnNull");
-        throwErrorIf(Array.isArray(config) || typeof config !== 'object', "error in pluginize(config): config.changeConfig returns a " + typeof config.changeConfig + " but should return an object (the modified config)", "config.changeConfig.wrongType");
+        if (factoryConfig.changeConfig)
+            config = factoryConfig.changeConfig(config, ctx);
+
+        throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns null but should return the modified config.', 'factoryConfig.changeConfig.isNull');
+        throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.changeConfig.wrongType');
+        throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns an Array but should return an object.', 'factoryConfig.changeConfig.wrongTypeArray');
 
 
         if (config.debug)
@@ -387,12 +481,8 @@ function applySyncFactory(configsFromInstance, configInstance) {
         ctx.log('Starting Pluginize.');
         addPluginSync(DefaultConfig, ctx);
 
-        console.log('dahin bin ich da1', config);
-
-        for (let pluginToApply of configsFromInstance)
+        for (let pluginToApply of factoryConfig.configs)
             addPluginSync(pluginToApply, ctx);
-
-        console.log('dahin bin ich da2', config);
 
         addPluginSync(config, ctx);
 
@@ -401,13 +491,14 @@ function applySyncFactory(configsFromInstance, configInstance) {
             throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.changeConfig.returnNull");
             throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.changeConfig.wrongType");
 
-
             ctx.log('- call hook "initPlugin" of plugin ' + _plugin.name);
             ctx.hooks.initPlugin.call(_plugin, ctx);
         }
 
         ctx.log('- call hook "pluginsInitialized"');
         ctx.hooks.pluginsInitialized.call(ctx);
+
+        ctx.hooks.return.call(ctx);
 
         if (ctx.return) {
             return ctx[ctx.return];
@@ -416,20 +507,45 @@ function applySyncFactory(configsFromInstance, configInstance) {
     }
 }
 
-function pluginize(configInstance = {}) {
-    const configsFromInstance = [];
+const validPluginAttributes = ['resolve', 'init'];
+
+function pluginize(configInstance = {}, _factoryConfig = {}) {
+    const factoryConfig = Object.assign({
+        configs: [],
+        plugins: []
+    }, _factoryConfig);
+
+    throwErrorIf(!Array.isArray(factoryConfig.plugins), 'pluginize(config,factoryConfig): factoryConfig.plugins should be null or an Array but is typeof ' + typeof factoryConfig.plugins, 'factoryConfig.plugins.wrongType');
 
     let configsAsArray = Array.isArray(configInstance) ? configInstance : [configInstance];
-    configsAsArray = configsAsArray.map(entry => { entry.name = entry.name || 'pluginize(config)'; return entry; });
+    configsAsArray = configsAsArray.map(entry => {
+        entry.name = entry.name || 'pluginize(config)';
 
-    configsFromInstance.push(...configsAsArray);
+        return entry;
+    });
 
+    factoryConfig.configs.push(...configsAsArray);
 
+    for (let plugin of factoryConfig.plugins) {
+        throwErrorIf(typeof plugin != 'object' || Array.isArray(plugin), 'pluginize(config,factoryConfig): A plugin in factoryConfig.plugins is typeof ' + typeof plugin + ' but should be an object', 'factoryConfig.plugins.plugin.wrongType');
+        throwErrorIf(Object.keys(plugin).some(key => !validPluginAttributes.includes(key)), `pluginize(config,factoryConfig): A plugin in factoryConfig.plugins has an invalid key. only ${validPluginAttributes.join(',')} is allowed.`, 'factoryConfig.plugins.plugin.wrongkey');
+        throwErrorIf(Object.keys(plugin).some(key => typeof plugin[key] != 'function'), `pluginize(config,factoryConfig): A plugin in factoryConfig.plugins has an invalid type. It must be typeof function.`, 'factoryConfig.plugins.plugin.wrongkeytype');
 
-    const apply = applyFactory(configsFromInstance, configInstance);
-    const applySync = applySyncFactory(configsFromInstance, configInstance);
+        if (plugin.init)
+            plugin.init(factoryConfig);
+    }
 
-    return { apply, applySync };
+    const apply = applyFactory(factoryConfig);
+    const applySync = applySyncFactory(factoryConfig);
+
+    let factory = { apply, applySync };
+
+    for (let plugin of factoryConfig.plugins) {
+        if (plugin.resolve)
+            factory = plugin.resolve(factory) || factory;
+    }
+
+    return factory;
 }
 
-export { pluginize };
+export { AsyncBreakableHook, AsyncHook, AsyncWaterfallHook, SyncBreakableHook, SyncHook, SyncWaterfallHook, pluginize };
