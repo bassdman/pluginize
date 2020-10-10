@@ -16,7 +16,9 @@
     },
     "keywords": [
         "plugin",
-        "pluginize"
+        "pluginize",
+        "infrastructure",
+        "library"
     ],
     "author": "Manuel Gelsen",
     "license": "MIT",
