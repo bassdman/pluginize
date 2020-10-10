@@ -1,6 +1,6 @@
 import { applyFactory } from './apply';
 import { applySyncFactory } from './applySync';
-
+import { SyncHook, AsyncHook, SyncWaterfallHook, AsyncWaterfallHook, SyncBreakableHook, AsyncBreakableHook } from './helpers/hooks.js';
 
 function pluginize(configInstance = {}) {
     const configsFromInstance = [];
@@ -18,4 +18,4 @@ function pluginize(configInstance = {}) {
     return { apply, applySync };
 }
 
-export { pluginize }
+export { pluginize, SyncHook, AsyncHook, SyncWaterfallHook, AsyncWaterfallHook, SyncBreakableHook, AsyncBreakableHook }

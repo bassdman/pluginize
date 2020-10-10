@@ -52,6 +52,7 @@ function applySyncFactory(configsFromInstance, configInstance) {
             _context: true,
             addPlugin: addPluginSync,
             hooks: {
+                return: new SyncHook(['context']),
                 preInitPlugin: new SyncWaterfallHook(['config', 'context']),
                 pluginsInitialized: new SyncHook(['context']),
                 initPlugin: new SyncHook(['plugin', 'context']),
@@ -77,12 +78,8 @@ function applySyncFactory(configsFromInstance, configInstance) {
         ctx.log('Starting Pluginize.')
         addPluginSync(DefaultPlugin, ctx);
 
-        console.log('dahin bin ich da1', config)
-
         for (let pluginToApply of configsFromInstance)
             addPluginSync(pluginToApply, ctx);
-
-        console.log('dahin bin ich da2', config)
 
         addPluginSync(config, ctx);
 
@@ -91,7 +88,6 @@ function applySyncFactory(configsFromInstance, configInstance) {
             throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.changeConfig.returnNull");
             throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.changeConfig.wrongType");
 
-
             ctx.log('- call hook "initPlugin" of plugin ' + _plugin.name);
             ctx.hooks.initPlugin.call(_plugin, ctx);
         }
@@ -99,6 +95,9 @@ function applySyncFactory(configsFromInstance, configInstance) {
         ctx.log('- call hook "pluginsInitialized"');
         ctx.hooks.pluginsInitialized.call(ctx);
 
+        ctx.hooks.return.call(ctx);
+
+        console.log(ctx)
         if (ctx.return) {
             return ctx[ctx.return];
         } else

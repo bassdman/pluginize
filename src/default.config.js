@@ -1,7 +1,10 @@
 import { InitHooksPlugin } from './plugins/hooks.plugin.js';
 import { ValidateConfigPlugin } from './plugins/validateConfig.plugin.js'
 import { ReturnPlugin } from './plugins/return.plugin.js'
+import { RenamePlugin } from './plugins/rename.plugin.js'
+import { DeletePlugin } from './plugins/delete.plugin.js'
 
+console.log('deleteplugin', DeletePlugin)
 
 const DefaultConfig = {
     name: 'DefaultPlugins',
@@ -30,6 +33,20 @@ const DefaultConfig = {
             Adds pluginize.return to the interface
         */
         new ReturnPlugin(),
+
+        /*
+            Enables adding {
+                rename: { foo: 'bar' },
+            } to the config.
+        */
+        new RenamePlugin(),
+
+        /*
+            Enables adding {
+                delete: ['foo','bar'],
+            } to the config.
+        */
+        new DeletePlugin()
     ]
 }
 

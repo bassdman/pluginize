@@ -46,6 +46,7 @@ function applyFactory(configsFromInstance, configInstance) {
             _context: true,
             addPlugin: addPluginAsync,
             hooks: {
+                return: new AsyncHook(['context']),
                 preInitPlugin: new AsyncWaterfallHook(['config', 'context']),
                 pluginsInitialized: new AsyncHook(['context']),
                 initPlugin: new AsyncHook(['plugin', 'context']),
@@ -89,6 +90,8 @@ function applyFactory(configsFromInstance, configInstance) {
 
         ctx.log('- call hook "pluginsInitialized"');
         await ctx.hooks.pluginsInitialized.promise(ctx);
+
+        await ctx.hooks.return.promise(ctx);
 
         if (ctx.return) {
             return ctx[ctx.return];
