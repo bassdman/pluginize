@@ -117,8 +117,83 @@ and you will have
     })
 
     //now returns whatever you want instead of the default output
-    const output yourLibrary.apply(config);
+    const output = yourLibrary.apply(config);
 ```
 ...
 
 ##Step by step
+
+Let's create a library together, step by step. So you will learn all features of pluginize.
+
+# Preparation
+Get the package
+``` shell
+    npm install pluginize --save
+```
+and import it into your project
+``` javascript
+    import {pluginize} form 'pluginize';
+```
+or as a script
+``` html
+    <!-- you can find the files in dist/pluginize.min.js" in this repository>-->
+    <script src="path/to/pluginize.min.js"></script>
+```
+now we create our first library that does (almost) nothing.
+``` javascript
+    const myLibrary = pluginize();
+
+    //yippie, we have a default result from a syncronous task
+    const syncResult = pluginize.applySync();
+
+    //if we want to apply some async tasks, we can use apply()
+    const asyncResult = await pluginize.apply();
+```
+
+both results will look like this
+``` javascript
+{
+  plugins: [ /*some internal plugins*/  ],
+  config: { name: 'Pluginize' },
+  _context: true,
+  addPlugin: [Function],
+  hooks: {
+    return: SyncHook {  },
+    preInitPlugin: SyncWaterfallHook {},
+    pluginsInitialized: SyncHook {  },
+    initPlugin: SyncHook { }
+  },
+  log: [Function], //you can log stz with result.log(xxx)
+  desactivateKeyCheck: [Function], 
+  addHooks: [Function], // you can add hooks with result.addHooks
+  on: [Function] // you can listen to hooks with result.on()
+}
+```
+Yippie we have built our first library. But it does look how we want it. Let's change it.
+
+## Add custom functions
+Of course your library will need some functions that the users can use. Let's add some.
+
+``` javascript
+    const myLibrary = pluginize({
+        init(config, context){
+            //1st way to add sth in the context - modify the context object
+            context.sayHelloDefault = function(){
+                return 'hello ' + config.name;
+            }
+
+            //2nd way: every attribute returned will be added to the context
+            return {
+                sayHello(name){
+                    return 'hello ' + name;
+                }
+            }
+        }
+    });
+
+    //now our result includes these two functions
+    const result = myLibrary.apply({name: 'heinrich'});
+    result.sayHelloDefault(); // hello heinrich
+    result.sayHello('Peter'); // hello peter
+
+```
