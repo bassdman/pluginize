@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script src="../../dist/pluginize.min.js"></script>
+    <script src="../../dist/pluginize-browser.js"></script>
 
     <script>
-        console.log(pluginize)
+        var lib = pluginize().applySync();
+        console.log(lib)
     </script>
 </head>
 

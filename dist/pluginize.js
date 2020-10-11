@@ -1,5 +1,8 @@
-var pluginize = (function (exports) {
-    'use strict';
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pluginize = {}));
+}(this, (function (exports) { 'use strict';
 
     let _errorMode = 'production';
 
@@ -559,6 +562,6 @@ var pluginize = (function (exports) {
     exports.SyncWaterfallHook = SyncWaterfallHook;
     exports.pluginize = pluginize;
 
-    return exports;
+    Object.defineProperty(exports, '__esModule', { value: true });
 
-}({}));
+})));
