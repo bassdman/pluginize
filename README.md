@@ -6,8 +6,8 @@
 [![npm downloads](https://img.shields.io/github/license/mashape/apistatus.svg)](https://www.npmjs.com/package/pluginize)
 
 Quick Links
-   - [The why](#thewhy)
-   - [Step by step - Tutorial](#stepbystep)
+   - [The why](#the-why)
+   - [Step by step - Tutorial](#step-by-step)
    - [API](#api)
  
 ## Install
@@ -126,6 +126,8 @@ and you will have
 Let's create a library together, step by step. So you will learn all features of pluginize.
 
 # Preparation
+[View the examples](https://github.com/bassdman/pluginize/tree/master/examples/basic)
+
 Get the package
 ``` shell
     npm install pluginize --save
@@ -144,10 +146,10 @@ now we create our first library that does (almost) nothing.
     const myLibrary = pluginize();
 
     //yippie, we have a default result from a syncronous task
-    const syncResult = pluginize.applySync();
+    const syncResult = myLibrary.applySync();
 
     //if we want to apply some async tasks, we can use apply()
-    const asyncResult = await pluginize.apply();
+    const asyncResult = await myLibrary.apply();
 ```
 
 both results will look like this
@@ -163,7 +165,7 @@ both results will look like this
     pluginsInitialized: SyncHook {  },
     initPlugin: SyncHook { }
   },
-  log: [Function], //you can log stz with result.log(xxx)
+  log: [Function], //you can log sth with result.log(xxx)
   desactivateKeyCheck: [Function], 
   addHooks: [Function], // you can add hooks with result.addHooks
   on: [Function] // you can listen to hooks with result.on()

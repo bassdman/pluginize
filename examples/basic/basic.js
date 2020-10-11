@@ -1,5 +1,14 @@
 const { pluginize } = require('pluginize');
 
-const result = pluginize().applySync();
+const myLibrary = pluginize();
 
-console.log(result);
+//yippie, we have a default result from a syncronous task
+const syncResult = myLibrary.applySync();
+
+console.log(syncResult);
+
+
+//if we want to apply some async tasks, we can use apply()
+const asyncResult = myLibrary.apply().then(result => {
+    console.log(result);
+});

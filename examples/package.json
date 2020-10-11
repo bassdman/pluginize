@@ -9,6 +9,10 @@
         "deploy": "node ./src/index.js",
         "testdeploy": "node ./dest/index.js"
     },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/bassdman/pluginize.git"
+    },
     "author": "Manuel Gelsen",
     "license": "MIT",
     "dependencies": {
