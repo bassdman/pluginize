@@ -1,0 +1,17 @@
+{
+    "name": "examples-pluginize",
+    "version": "0.1.0",
+    "description": "examples of pluginize",
+    "main": "dist/pluginize.min.js",
+    "scripts": {
+        "test": "karma start",
+        "build": "rollup --config",
+        "deploy": "node ./src/index.js",
+        "testdeploy": "node ./dest/index.js"
+    },
+    "author": "Manuel Gelsen",
+    "license": "MIT",
+    "dependencies": {
+        "pluginize": "file:../"
+    }
+}
