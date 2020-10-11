@@ -42,7 +42,5 @@
         "webpack-cli": "^3.3.12",
         "webpack-karma-jasmine": "^4.0.0"
     },
-    "dependencies": {
-        "tapable": "^2.0.0"
-    }
+    "dependencies": {}
 }
