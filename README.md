@@ -126,7 +126,7 @@ and you will have
 Let's create a library together, step by step. So you will learn all features of pluginize.
 
 # Preparation
-[View the examples](https://github.com/bassdman/pluginize/tree/master/examples/basic)
+[View some examples](https://github.com/bassdman/pluginize/tree/master/examples/basic)
 
 Get the package
 ``` shell
@@ -174,20 +174,22 @@ both results will look like this
 Yippie we have built our first library. But it does look how we want it. Let's change it.
 
 ## Add custom functions
+[View an example](https://github.com/bassdman/pluginize/tree/master/examples/custom-functions)
+
 Of course your library will need some functions that the users can use. Let's add some.
 
 ``` javascript
     const myLibrary = pluginize({
-        init(config, context){
+        init(config, context) {
             //1st way to add sth in the context - modify the context object
-            context.sayHelloDefault = function(){
-                return 'hello ' + config.name;
+            context.sayHelloDefault = function() {
+                console.log('hello ' + context.config.name);
             }
 
             //2nd way: every attribute returned will be added to the context
             return {
-                sayHello(name){
-                    return 'hello ' + name;
+                sayHello(name) {
+                    console.log('hello ' + name);
                 }
             }
         }
@@ -197,5 +199,38 @@ Of course your library will need some functions that the users can use. Let's ad
     const result = myLibrary.apply({name: 'heinrich'});
     result.sayHelloDefault(); // hello heinrich
     result.sayHello('Peter'); // hello peter
+```
 
+## Add Plugins
+[View an example](https://github.com/bassdman/pluginize/tree/master/examples/add-plugins)
+
+This is such a great feature - others should also be able to use it. Let's outsource it as a plugin.
+
+``` javascript
+//sayhello.plugin.js
+module.exports = {
+    // Every plugin needs a name - so let's name it 'SayHelloPlugin'
+    name: 'SayHelloPlugin',
+    init(config, context) {
+        return {
+            sayHelloDefault(){
+                console.log('hello ' + context.config.name);
+            },
+            sayHello(name) {
+                console.log('hello ' + name);
+            }
+        }
+    }
+}
+```
+```javascript
+    // index.js
+    const sayHelloPlugin = require('./sayhello.plugin');
+    const { pluginize } = require('pluginize');
+
+    const myLibrary = pluginize({
+        plugins: [sayHelloPlugin]
+    });
+
+    const result = myLibrary.applySync();
 ```
