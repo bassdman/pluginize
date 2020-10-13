@@ -1,8 +1,9 @@
-(function (global, factory) {
+(function(global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-    typeof define === 'function' && define.amd ? define(['exports'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pluginize = {}));
-}(this, (function (exports) { 'use strict';
+        typeof define === 'function' && define.amd ? define(['exports'], factory) :
+        (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pluginize = {}));
+}(this, (function(exports) {
+    'use strict';
 
     let _errorMode = 'production';
 
@@ -311,7 +312,7 @@
         }
     }
 
-    function applyFactory(factoryConfig) {
+    function runPromiseFactory(factoryConfig) {
         async function addPluginAsync(conf, ctx) {
 
             ctx.log('- Add plugin "' + conf.name + '"');
@@ -348,7 +349,7 @@
             return ctx;
         }
 
-        return async function apply(config = {}) {
+        return async function runPromise(config = {}) {
             let ctx = {
                 plugins: [],
                 config,
@@ -383,8 +384,8 @@
             ctx.log('Starting Pluginize.');
             await addPluginAsync(DefaultConfig, ctx);
 
-            for (let pluginToApply of factoryConfig.configs)
-                await addPluginAsync(pluginToApply, ctx);
+            for (let pluginTorunPromise of factoryConfig.configs)
+                await addPluginAsync(pluginTorunPromise, ctx);
 
             await addPluginAsync(config, ctx);
 
@@ -410,7 +411,7 @@
         }
     }
 
-    function applySyncFactory(factoryConfig) {
+    function runFactory(factoryConfig) {
         function addPluginSync(conf, ctx) {
 
             ctx.log('- Add plugin "' + conf.name + '"');
@@ -452,7 +453,7 @@
             return ctx;
         }
 
-        return function applySync(config = {}) {
+        return function run(config = {}) {
             let ctx = {
                 plugins: [],
                 config,
@@ -487,8 +488,8 @@
             ctx.log('Starting Pluginize.');
             addPluginSync(DefaultConfig, ctx);
 
-            for (let pluginToApply of factoryConfig.configs)
-                addPluginSync(pluginToApply, ctx);
+            for (let pluginTorunPromise of factoryConfig.configs)
+                addPluginSync(pluginTorunPromise, ctx);
 
             addPluginSync(config, ctx);
 
@@ -541,10 +542,10 @@
                 plugin.init(factoryConfig);
         }
 
-        const apply = applyFactory(factoryConfig);
-        const applySync = applySyncFactory(factoryConfig);
+        const runPromise = runPromiseFactory(factoryConfig);
+        const run = runFactory(factoryConfig);
 
-        let factory = { apply, applySync };
+        let factory = { runPromise, run };
 
         for (let plugin of factoryConfig.plugins) {
             if (plugin.resolve)

@@ -5,6 +5,6 @@ const myLibrary = pluginize({
     plugins: [sayHelloPlugin]
 });
 
-const result = myLibrary.applySync();
+const result = myLibrary.run();
 
 console.log(result);

@@ -1,5 +1,5 @@
-import { applyFactory } from './apply';
-import { applySyncFactory } from './applySync';
+import { runPromiseFactory } from './runPromise';
+import { runFactory } from './run';
 import { throwErrorIf, errorMode } from './helpers/throwError.js';
 import { SyncHook, AsyncHook, SyncWaterfallHook, AsyncWaterfallHook, SyncBreakableHook, AsyncBreakableHook } from './helpers/hooks.js';
 
@@ -31,10 +31,10 @@ function pluginize(configInstance = {}, _factoryConfig = {}) {
             plugin.init(factoryConfig)
     }
 
-    const apply = applyFactory(factoryConfig);
-    const applySync = applySyncFactory(factoryConfig);
+    const runPromise = runPromiseFactory(factoryConfig);
+    const run = runFactory(factoryConfig);
 
-    let factory = { apply, applySync };
+    let factory = { runPromise, run };
 
     for (let plugin of factoryConfig.plugins) {
         if (plugin.resolve)

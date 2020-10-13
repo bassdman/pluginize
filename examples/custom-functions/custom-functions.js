@@ -17,6 +17,6 @@ const myLibrary = pluginize({
 });
 
 //now our result includes these two functions
-const result = myLibrary.applySync({ name: 'heinrich' });
+const result = myLibrary.run({ name: 'heinrich' });
 result.sayHelloDefault(); // hello heinrich
 result.sayHello('Peter'); // hello peter

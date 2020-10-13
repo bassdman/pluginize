@@ -5,49 +5,49 @@ import { SyncHook } from 'tapable';
 errorMode('development');
 
 
-describe("pluginize().applySync(config)", function() {
+describe("pluginize().run(config)", function() {
     it("should be typeof function", function() {
         expect(typeof pluginize).toBe('function')
     });
 
     it("should return an object if called without parameter", function() {
-        const result = pluginize().applySync();
+        const result = pluginize().run();
         expect(typeof result).toBe('object');
     });
 
     it("should return an object if called with an object", function() {
-        const result = pluginize().applySync({});
+        const result = pluginize().run({});
         expect(typeof result).toBe('object');
     });
 
     it("should throw an error if invalid configattribute xyabc is added", function() {
         expect(() => {
-            pluginize().applySync({ xyabc: true });
+            pluginize().run({ xyabc: true });
         }).toThrow('config.invalidKey');
     });
 
     it("should not throw an error for attribute plugins as an array", function() {
         expect(() => {
-            return pluginize().applySync({ plugins: [] });
+            return pluginize().run({ plugins: [] });
         }).not.toThrow();
     });
     it("should throw an error for attribute plugins if it is not an array", function() {
         expect(() => {
-            return pluginize().applySync({ plugins: {} });
+            return pluginize().run({ plugins: {} });
         }).toThrow('config.plugin.wrongtype');
     });
     it("should not throw an error for attribute init", function() {
         expect(() => {
-            return pluginize().applySync({ init: function() {} });
+            return pluginize().run({ init: function() {} });
         }).not.toThrow();
     });
     it("should throw an error for attribute init if it is not a function", function() {
         expect(() => {
-            return pluginize().applySync({ init: {} });
+            return pluginize().run({ init: {} });
         }).toThrow('config.init.wrongtype');
     });
     it("should add function xy to the context if it is returend in initfunction", function() {
-        const result = pluginize().applySync({
+        const result = pluginize().run({
             init: function() {
                 return {
                     abc: function() {}
@@ -59,7 +59,7 @@ describe("pluginize().applySync(config)", function() {
     it("should ignore other return types then object for init function", function() {
 
         expect(() => {
-            pluginize().applySync({
+            pluginize().run({
                 init: function() {
                     return 5;
                 }
@@ -68,17 +68,17 @@ describe("pluginize().applySync(config)", function() {
     });
     it("should be valid to add a config attribute called 'hooks' = {}", function() {
         expect(() => {
-            return pluginize().applySync({ hooks: {} });
+            return pluginize().run({ hooks: {} });
         }).not.toThrow();
     });
     it("should throw an error if config attribute 'hooks' is not an object", function() {
         expect(() => {
-            return pluginize().applySync({ hooks: [] });
+            return pluginize().run({ hooks: [] });
         }).toThrow('config.hooks.wrongtype');
     });
     it("should throw an error if hooks named 'xyz' does not exist", function() {
         expect(() => {
-            return pluginize().applySync({
+            return pluginize().run({
                 hooks: {
                     xyz: true
                 }
@@ -87,7 +87,7 @@ describe("pluginize().applySync(config)", function() {
     });
     it("should have a hook called 'initPlugin'", function() {
         expect(() => {
-            return pluginize().applySync({
+            return pluginize().run({
                 hooks: {
                     initPlugin: function() {}
                 }
@@ -96,7 +96,7 @@ describe("pluginize().applySync(config)", function() {
     });
     it("should have a hook called 'pluginsInitialized'", function() {
         expect(() => {
-            return pluginize().applySync({
+            return pluginize().run({
                 hooks: {
                     pluginsInitialized: function() {}
                 }
@@ -105,17 +105,17 @@ describe("pluginize().applySync(config)", function() {
     });
     it("should be valid to add a config attribute called 'addHooks' = {}", function() {
         expect(() => {
-            return pluginize().applySync({ addHooks: {} });
+            return pluginize().run({ addHooks: {} });
         }).not.toThrow();
     });
     it("should throw an error if config attribute 'addHooks' is not an object", function() {
         expect(() => {
-            return pluginize().applySync({ addHooks: [] });
+            return pluginize().run({ addHooks: [] });
         }).toThrow('config.addHooks.wrongtype');
     });
     it("should not throw an error with addHook:{xyz} and hook:{xyz}", function() {
         expect(() => {
-            return pluginize().applySync({
+            return pluginize().run({
                 debug: true,
                 addHooks: {
                     xyz: new SyncHook()
@@ -128,26 +128,26 @@ describe("pluginize().applySync(config)", function() {
     });
     it("should not throw an error if invalid configattribute xyabc is added and config.desactivateKeyCheck == true", function() {
         expect(() => {
-            return pluginize().applySync({ xyabc: true, desactivateKeyCheck: true });
+            return pluginize().run({ xyabc: true, desactivateKeyCheck: true });
         }).not.toThrow();
     });
 
     it("should have a function desactivateKeyCheck in context", function() {
-        const result = pluginize().applySync();
+        const result = pluginize().run();
 
         expect(result.desactivateKeyCheck).toBeDefined();
     });
 
     describe('config.hooks.preInitPlugin', function() {
         it("should have a hook 'preInitPlugin'", function() {
-            const result = pluginize().applySync();
+            const result = pluginize().run();
 
             expect(result.hooks.preInitPlugin).toBeDefined();
         });
 
         it("should be called before 'initPlugin'", function() {
             const order = [];
-            pluginize().applySync({
+            pluginize().run({
                 hooks: {
                     preInitPlugin() {
                         if (!order.includes('preInitPlugin'))
@@ -164,7 +164,7 @@ describe("pluginize().applySync(config)", function() {
         });
 
         it("should change the config attribute _test to 'test' when it is changed", function() {
-            const result = pluginize().applySync({
+            const result = pluginize().run({
                 _test: true,
                 hooks: {
                     preInitPlugin(config) {
@@ -181,7 +181,7 @@ describe("pluginize().applySync(config)", function() {
 
         it("should throw an error for an empty plugin without a name", function() {
             expect(() => {
-                pluginize().applySync({
+                pluginize().run({
                     plugins: [{
 
                     }],
@@ -190,7 +190,7 @@ describe("pluginize().applySync(config)", function() {
         });
 
         it("should add name = 'default' to the config of an empty plugin", function() {
-            const result = pluginize().applySync({
+            const result = pluginize().run({
                 plugins: [{
 
                 }],

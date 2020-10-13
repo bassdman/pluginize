@@ -2,7 +2,7 @@ import { DefaultConfig as DefaultPlugin } from './default.config.js';
 import { SyncHook, SyncWaterfallHook } from './helpers/hooks.js';
 import { throwErrorIf, errorMode } from './helpers/throwError.js';
 
-function applySyncFactory(factoryConfig) {
+function runFactory(factoryConfig) {
     function addPluginSync(conf, ctx) {
 
         ctx.log('- Add plugin "' + conf.name + '"');
@@ -44,7 +44,7 @@ function applySyncFactory(factoryConfig) {
         return ctx;
     }
 
-    return function applySync(config = {}) {
+    return function run(config = {}) {
         let ctx = {
             plugins: [],
             config,
@@ -79,8 +79,8 @@ function applySyncFactory(factoryConfig) {
         ctx.log('Starting Pluginize.')
         addPluginSync(DefaultPlugin, ctx);
 
-        for (let pluginToApply of factoryConfig.configs)
-            addPluginSync(pluginToApply, ctx);
+        for (let pluginTorunPromise of factoryConfig.configs)
+            addPluginSync(pluginTorunPromise, ctx);
 
         addPluginSync(config, ctx);
 
@@ -105,4 +105,4 @@ function applySyncFactory(factoryConfig) {
     }
 }
 
-export { applySyncFactory }
+export { runFactory }

@@ -7,12 +7,12 @@ errorMode('development');
 
 it("should not throw an error if config-attribute 'return' is set", function() {
     expect(() => {
-        return pluginize().applySync({ return: 'abc' });
+        return pluginize().run({ return: 'abc' });
     }).not.toThrow();
 });
 
 it("should return'hello world' if config-attribute 'return' is 'helloworld' with context.helloworld = 'hello world'", function() {
-    const result = pluginize().applySync({
+    const result = pluginize().run({
         return: 'helloworld',
         init() {
             return {

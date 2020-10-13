@@ -7,7 +7,7 @@ errorMode('development');
 
 describe("RenamePlugin", function() {
     it("should rename context.abc to context.def", function() {
-        const result = pluginize().applySync({
+        const result = pluginize().run({
             init() {
                 return {
                     abc: true

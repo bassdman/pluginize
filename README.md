@@ -24,7 +24,7 @@ Just write this line of code
 and you will have
 - the ability to add Plugins
 ``` javascript
-    yourLibrary.apply({
+    yourLibrary.runPromise({
         plugins:[pluginA, pluginB,..]
     })
 ```
@@ -34,7 +34,7 @@ and you will have
         // add pluginconfiguration here
         plugins: [nestedPlugin1,nestedPlugin2];
     }
-    yourLibrary.apply({
+    yourLibrary.runPromise({
         plugins:[plugin]
     });
 ```
@@ -53,7 +53,7 @@ and you will have
 
 - the chance to hook in every process of your library (and of course of the plugins, too)
 ``` javascript
-    yourLibrary.apply({
+    yourLibrary.runPromise({
         hooks: {
             initPlugin(config){
                 //do sth when your library / the plugins are initialized
@@ -69,7 +69,7 @@ and you will have
 ```
 - choose how your library will be used
 ``` javascript
-    //instead of an object with an apply-function it could also be a function
+    //instead of an object with an runPromise-function it could also be a function
     yourLibrary(/*here comes the config*/);
 ```
 - choose what your plugin returns
@@ -91,7 +91,7 @@ and you will have
     });
 
     //now returns whatever you want instead of the default output
-    const output yourLibrary.apply(config);
+    const output yourLibrary.runPromise(config);
 ```
 - add your hooks that can be used
 ``` javascript
@@ -108,7 +108,7 @@ and you will have
     });
 
     //it can be used like this
-    yourLibrary.apply({
+    yourLibrary.runPromise({
         hooks: {
             after5Seconds(message){
                 //do sth after 5 seconds
@@ -117,7 +117,7 @@ and you will have
     })
 
     //now returns whatever you want instead of the default output
-    const output = yourLibrary.apply(config);
+    const output = yourLibrary.runPromise(config);
 ```
 ...
 
@@ -146,10 +146,10 @@ now we create our first library that does (almost) nothing.
     const myLibrary = pluginize();
 
     //yippie, we have a default result from a syncronous task
-    const syncResult = myLibrary.applySync();
+    const syncResult = myLibrary.run();
 
-    //if we want to apply some async tasks, we can use apply()
-    const asyncResult = await myLibrary.apply();
+    //if we want to runPromise some async tasks, we can use runPromise()
+    const asyncResult = await myLibrary.runPromise();
 ```
 
 both results will look like this
@@ -196,7 +196,7 @@ Of course your library will need some functions that the users can use. Let's ad
     });
 
     //now our result includes these two functions
-    const result = myLibrary.apply({name: 'heinrich'});
+    const result = myLibrary.runPromise({name: 'heinrich'});
     result.sayHelloDefault(); // hello heinrich
     result.sayHello('Peter'); // hello peter
 ```
@@ -232,5 +232,5 @@ module.exports = {
         plugins: [sayHelloPlugin]
     });
 
-    const result = myLibrary.applySync();
+    const result = myLibrary.run();
 ```

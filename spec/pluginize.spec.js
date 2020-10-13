@@ -8,15 +8,15 @@ describe("pluginize(config)", function() {
         expect(typeof pluginize).toBe('function');
     });
 
-    it("should have a function called apply when executed", function() {
-        expect(pluginize().apply).toBeDefined();
+    it("should have a function called runPromise when executed", function() {
+        expect(pluginize().runPromise).toBeDefined();
     });
 
-    it("should have a function called applySync when executed", function() {
-        expect(pluginize().applySync).toBeDefined();
+    it("should have a function called run when executed", function() {
+        expect(pluginize().run).toBeDefined();
     });
 
-    it("should return 'hello world' if pluginize(config) initializes it and applySync() is called without parameter", function() {
+    it("should return 'hello world' if pluginize(config) initializes it and run() is called without parameter", function() {
         const result = pluginize({
             return: 'helloworld',
             init() {
@@ -24,7 +24,7 @@ describe("pluginize(config)", function() {
                     helloworld: 'hello world'
                 }
             }
-        }).applySync();
+        }).run();
 
         expect(result).toBe('hello world');
     });
@@ -44,7 +44,7 @@ describe("pluginize(config)", function() {
                     }
                 }
             }]
-        ).applySync();
+        ).run();
         expect(result.hw1).toBe('hello world1');
         expect(result.hw2).toBe('hello world2');
     });
@@ -55,7 +55,7 @@ describe("pluginize(config)", function() {
                 changeConfig: function(config) {
 
                 }
-            }).applySync();
+            }).run();
         }).toThrow('factoryConfig.changeConfig.isNull');
     });
 
@@ -65,7 +65,7 @@ describe("pluginize(config)", function() {
                 changeConfig: function(config) {
                     return 5;
                 }
-            }).applySync();
+            }).run();
         }).toThrow('factoryConfig.changeConfig.wrongType');
     });
 
@@ -75,7 +75,7 @@ describe("pluginize(config)", function() {
                 changeConfig: function(config) {
                     return [];
                 }
-            }).applySync();
+            }).run();
         }).toThrow('factoryConfig.changeConfig.wrongTypeArray');
     });
 
@@ -87,7 +87,7 @@ describe("pluginize(config)", function() {
 
                 return config;
             },
-        }, ).applySync({ _test: true, allowKeys: ['test'] });
+        }, ).run({ _test: true, allowKeys: ['test'] });
         expect(result.config.test).toBeDefined();
     });
 
@@ -95,7 +95,7 @@ describe("pluginize(config)", function() {
         expect(() => {
             const result = pluginize({}, {
                 plugins: 5
-            }, ).applySync();
+            }, ).run();
         }).toThrow('factoryConfig.plugins.wrongType');
     });
 
@@ -103,7 +103,7 @@ describe("pluginize(config)", function() {
         expect(() => {
             const result = pluginize({}, {
                 plugins: [5]
-            }, ).applySync();
+            }, ).run();
         }).toThrow('factoryConfig.plugins.plugin.wrongType');
     });
 
@@ -111,7 +111,7 @@ describe("pluginize(config)", function() {
         expect(() => {
             const result = pluginize({}, {
                 plugins: [{ abc: true }]
-            }, ).applySync();
+            }, ).run();
         }).toThrow('factoryConfig.plugins.plugin.wrongkey');
     });
 
@@ -119,7 +119,7 @@ describe("pluginize(config)", function() {
         expect(() => {
             pluginize({}, {
                 plugins: [{ resolve: true }]
-            }, ).applySync();
+            }, ).run();
         }).toThrow('factoryConfig.plugins.plugin.wrongkeytype');
     });
 
@@ -127,7 +127,7 @@ describe("pluginize(config)", function() {
         const init = jasmine.createSpy('init');
         pluginize({}, {
             plugins: [{ init }]
-        }, ).applySync();
+        }, ).run();
 
         expect(init).toHaveBeenCalledTimes(1);
     });
@@ -136,7 +136,7 @@ describe("pluginize(config)", function() {
         const resolve = jasmine.createSpy('resolve');
         pluginize({}, {
             plugins: [{ resolve }]
-        }, ).applySync();
+        }, ).run();
 
         expect(resolve).toHaveBeenCalledTimes(1);
     });

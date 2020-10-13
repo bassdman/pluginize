@@ -2,7 +2,7 @@ import { DefaultConfig as DefaultPlugin } from './default.config.js';
 import { AsyncHook, AsyncWaterfallHook } from './helpers/hooks.js';
 import { throwErrorIf, errorMode } from './helpers/throwError.js';
 
-function applyFactory(factoryConfig) {
+function runPromiseFactory(factoryConfig) {
     async function addPluginAsync(conf, ctx) {
 
         ctx.log('- Add plugin "' + conf.name + '"');
@@ -39,7 +39,7 @@ function applyFactory(factoryConfig) {
         return ctx;
     }
 
-    return async function apply(config = {}) {
+    return async function runPromise(config = {}) {
         let ctx = {
             plugins: [],
             config,
@@ -74,8 +74,8 @@ function applyFactory(factoryConfig) {
         ctx.log('Starting Pluginize.')
         await addPluginAsync(DefaultPlugin, ctx);
 
-        for (let pluginToApply of factoryConfig.configs)
-            await addPluginAsync(pluginToApply, ctx);
+        for (let pluginTorunPromise of factoryConfig.configs)
+            await addPluginAsync(pluginTorunPromise, ctx);
 
         await addPluginAsync(config, ctx);
 
@@ -101,4 +101,4 @@ function applyFactory(factoryConfig) {
     }
 }
 
-export { applyFactory }
+export { runPromiseFactory }
