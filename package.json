@@ -42,5 +42,7 @@
         "webpack-cli": "^3.3.12",
         "webpack-karma-jasmine": "^4.0.0"
     },
-    "dependencies": {}
+    "dependencies": {
+        "clone-deep": "^4.0.1"
+    }
 }

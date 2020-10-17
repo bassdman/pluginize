@@ -1,9 +1,8 @@
-(function(global, factory) {
+(function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-        typeof define === 'function' && define.amd ? define(['exports'], factory) :
-        (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pluginize = {}));
-}(this, (function(exports) {
-    'use strict';
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pluginize = {}));
+}(this, (function (exports) { 'use strict';
 
     let _errorMode = 'production';
 
@@ -71,7 +70,7 @@
     }
 
     function ValidateConfigPlugin() {
-        const usedKeys = ['name', 'hooks', 'init', 'allowKeys', 'desactivateKeyCheck', 'plugins', 'debug', 'changeConfig'];
+        const usedKeys = ['name', 'hooks', 'init', 'allowKeys', 'desactivateKeyCheck', 'plugins', 'debug', 'preInit'];
         let desactivateKeyCheck = false;
 
         return {
@@ -367,12 +366,12 @@
                 }
             };
 
-            if (factoryConfig.changeConfig)
-                config = await factoryConfig.changeConfig(config, ctx);
+            if (factoryConfig.preInit)
+                config = await factoryConfig.preInit(config, ctx);
 
-            throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns null but should return the modified config.', 'factoryConfig.changeConfig.isNull');
-            throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.changeConfig.wrongType');
-            throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns an Array but should return an object.', 'factoryConfig.changeConfig.wrongTypeArray');
+            throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.preInit returns null but should return the modified config.', 'factoryConfig.preInit.isNull');
+            throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.preInit returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.preInit.wrongType');
+            throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.preInit returns an Array but should return an object.', 'factoryConfig.preInit.wrongTypeArray');
 
 
             if (config.debug)
@@ -391,8 +390,8 @@
 
 
             for (let _plugin of ctx.plugins) {
-                throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.changeConfig.returnNull");
-                throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.changeConfig.wrongType");
+                throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.preInit.returnNull");
+                throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.preInit.wrongType");
 
 
                 ctx.log('- call hook "initPlugin" of plugin ' + _plugin.name);
@@ -471,12 +470,13 @@
                 }
             };
 
-            if (factoryConfig.changeConfig)
-                config = factoryConfig.changeConfig(config, ctx);
+            const lastConfig = factoryConfig.configs[factoryConfig.configs.length - 1];
+            if (lastConfig.preInit)
+                config = lastConfig.preInit(config, ctx) || config;
 
-            throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns null but should return the modified config.', 'factoryConfig.changeConfig.isNull');
-            throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.changeConfig.wrongType');
-            throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns an Array but should return an object.', 'factoryConfig.changeConfig.wrongTypeArray');
+            throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.preInit returns null but should return the modified config.', 'factoryConfig.preInit.isNull');
+            throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.preInit returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.preInit.wrongType');
+            throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.preInit returns an Array but should return an object.', 'factoryConfig.preInit.wrongTypeArray');
 
 
             if (config.debug)
@@ -495,8 +495,8 @@
 
 
             for (let _plugin of ctx.plugins) {
-                throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.changeConfig.returnNull");
-                throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.changeConfig.wrongType");
+                throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.preInit.returnNull");
+                throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.preInit.wrongType");
 
                 ctx.log('- call hook "initPlugin" of plugin ' + _plugin.name);
                 ctx.hooks.initPlugin.call(_plugin, ctx);
@@ -514,46 +514,41 @@
         }
     }
 
-    const validPluginAttributes = ['resolve', 'init'];
+    function pluginizeFactory(_factoryConfig = {}, staticAttributes = {}) {
 
-    function pluginize(configInstance = {}, _factoryConfig = {}) {
-        const factoryConfig = Object.assign({
-            configs: [],
-            plugins: []
-        }, _factoryConfig);
+        function _pluginize(configInstance = {}) {
+            const factoryConfig = Object.assign({
+                configs: [],
+            }, _factoryConfig);
 
-        throwErrorIf(!Array.isArray(factoryConfig.plugins), 'pluginize(config,factoryConfig): factoryConfig.plugins should be null or an Array but is typeof ' + typeof factoryConfig.plugins, 'factoryConfig.plugins.wrongType');
 
-        let configsAsArray = Array.isArray(configInstance) ? configInstance : [configInstance];
-        configsAsArray = configsAsArray.map(entry => {
-            entry.name = entry.name || 'pluginize(config)';
 
-            return entry;
-        });
+            let configsAsArray = Array.isArray(configInstance) ? configInstance : [configInstance];
+            configsAsArray = configsAsArray.map(entry => {
+                entry.name = entry.name || 'pluginize(config)';
 
-        factoryConfig.configs.push(...configsAsArray);
+                return entry;
+            });
 
-        for (let plugin of factoryConfig.plugins) {
-            throwErrorIf(typeof plugin != 'object' || Array.isArray(plugin), 'pluginize(config,factoryConfig): A plugin in factoryConfig.plugins is typeof ' + typeof plugin + ' but should be an object', 'factoryConfig.plugins.plugin.wrongType');
-            throwErrorIf(Object.keys(plugin).some(key => !validPluginAttributes.includes(key)), `pluginize(config,factoryConfig): A plugin in factoryConfig.plugins has an invalid key. only ${validPluginAttributes.join(',')} is allowed.`, 'factoryConfig.plugins.plugin.wrongkey');
-            throwErrorIf(Object.keys(plugin).some(key => typeof plugin[key] != 'function'), `pluginize(config,factoryConfig): A plugin in factoryConfig.plugins has an invalid type. It must be typeof function.`, 'factoryConfig.plugins.plugin.wrongkeytype');
+            factoryConfig.configs.push(...configsAsArray);
 
-            if (plugin.init)
-                plugin.init(factoryConfig);
+            const runPromise = runPromiseFactory(factoryConfig);
+            const run = runFactory(factoryConfig);
+
+            let factory = new pluginizeFactory(factoryConfig, { runPromise, run, factoryConfig: factoryConfig });
+
+            return factory;
         }
 
-        const runPromise = runPromiseFactory(factoryConfig);
-        const run = runFactory(factoryConfig);
-
-        let factory = { runPromise, run };
-
-        for (let plugin of factoryConfig.plugins) {
-            if (plugin.resolve)
-                factory = plugin.resolve(factory) || factory;
+        for (let key of Object.keys(staticAttributes)) {
+            _pluginize[key] = staticAttributes[key];
         }
 
-        return factory;
+        return _pluginize;
+
     }
+
+    const pluginize = pluginizeFactory({});
 
     exports.AsyncBreakableHook = AsyncBreakableHook;
     exports.AsyncHook = AsyncHook;

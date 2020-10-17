@@ -49,39 +49,29 @@ describe("pluginize(config)", function() {
         expect(result.hw2).toBe('hello world2');
     });
 
-    it("should throw an error if config.changeConfig returns undefined", function() {
+    it("should throw an error if config.preInit returns a number", function() {
         expect(() => {
-            pluginize({}, {
-                changeConfig: function(config) {
-
-                }
-            }).run();
-        }).toThrow('factoryConfig.changeConfig.isNull');
-    });
-
-    it("should throw an error if config.changeConfig returns a number", function() {
-        expect(() => {
-            pluginize({}, {
-                changeConfig: function(config) {
+            pluginize({
+                preInit: function(config) {
                     return 5;
                 }
             }).run();
-        }).toThrow('factoryConfig.changeConfig.wrongType');
+        }).toThrow('factoryConfig.preInit.wrongType');
     });
 
-    it("should throw an error if config.changeConfig returns an Array", function() {
+    it("should throw an error if config.preInit returns an Array", function() {
         expect(() => {
-            pluginize({}, {
-                changeConfig: function(config) {
+            pluginize({
+                preInit: function(config) {
                     return [];
                 }
             }).run();
-        }).toThrow('factoryConfig.changeConfig.wrongTypeArray');
+        }).toThrow('factoryConfig.preInit.wrongTypeArray');
     });
 
-    it("should add config.test in the configattributes when config.changeConfig added this", function() {
-        const result = pluginize({}, {
-            changeConfig: function(config) {
+    it("should add config.test in the configattributes when config.preInit added this", function() {
+        const result = pluginize({
+            preInit: function(config) {
                 config.test = config._test;
                 delete config._test;
 
@@ -91,53 +81,25 @@ describe("pluginize(config)", function() {
         expect(result.config.test).toBeDefined();
     });
 
-    it("should throw an error if a factoryConfig.plugins is a number", function() {
-        expect(() => {
-            const result = pluginize({}, {
-                plugins: 5
-            }, ).run();
-        }).toThrow('factoryConfig.plugins.wrongType');
+    it("should return a function", function() {
+        const result = pluginize();
+
+        expect(typeof result).toBe('function');
     });
 
-    it("should throw an error if a factoryConfig.plugins is a number", function() {
-        expect(() => {
-            const result = pluginize({}, {
-                plugins: [5]
-            }, ).run();
-        }).toThrow('factoryConfig.plugins.plugin.wrongType');
+    it("should have 1 plugin internally for each of two called pluginze-functions", function() {
+        const lib1 = pluginize({ init() {} });
+        const lib2 = pluginize();
+
+        expect(lib1.factoryConfig.configs.length).toBe(1);
+        expect(lib2.factoryConfig.configs.length).toBe(1);
     });
 
-    it("should throw an error if a factoryConfig.plugins is a number", function() {
-        expect(() => {
-            const result = pluginize({}, {
-                plugins: [{ abc: true }]
-            }, ).run();
-        }).toThrow('factoryConfig.plugins.plugin.wrongkey');
-    });
+    it("should have 2 plugins internally when it is created after another one", function() {
+        const lib1 = pluginize()();
+        const lib2 = pluginize()()();
 
-    it("should throw an error if a factoryConfig.plugins is a number", function() {
-        expect(() => {
-            pluginize({}, {
-                plugins: [{ resolve: true }]
-            }, ).run();
-        }).toThrow('factoryConfig.plugins.plugin.wrongkeytype');
-    });
-
-    it("should call plugin.init when a plugin uses an init function", function() {
-        const init = jasmine.createSpy('init');
-        pluginize({}, {
-            plugins: [{ init }]
-        }, ).run();
-
-        expect(init).toHaveBeenCalledTimes(1);
-    });
-
-    it("should call plugin.init when a plugin uses an init function", function() {
-        const resolve = jasmine.createSpy('resolve');
-        pluginize({}, {
-            plugins: [{ resolve }]
-        }, ).run();
-
-        expect(resolve).toHaveBeenCalledTimes(1);
+        expect(lib1.factoryConfig.configs.length).toBe(2);
+        expect(lib2.factoryConfig.configs.length).toBe(3);
     });
 });

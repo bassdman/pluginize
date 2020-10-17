@@ -25,7 +25,7 @@ export default [{
     }]
 }, {
     input: 'src/index.js',
-    plugins: [nodePolyfills(), commonjs(), resolve(), babel({
+    plugins: [nodePolyfills(), resolve({ browser: true }), commonjs(), babel({
         babelHelpers: 'runtime',
         presets: ['@babel/preset-env'],
         plugins: [

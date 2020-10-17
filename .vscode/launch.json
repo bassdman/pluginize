@@ -17,15 +17,6 @@
             "skipFiles": [
                 "<node_internals>/**"
             ]
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Programm starten",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}/src/index.js"
         }
     ]
 }

@@ -62,12 +62,13 @@ function runFactory(factoryConfig) {
             }
         };
 
-        if (factoryConfig.changeConfig)
-            config = factoryConfig.changeConfig(config, ctx);
+        const lastConfig = factoryConfig.configs[factoryConfig.configs.length - 1];
+        if (lastConfig.preInit)
+            config = lastConfig.preInit(config, ctx) || config;
 
-        throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns null but should return the modified config.', 'factoryConfig.changeConfig.isNull')
-        throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.changeConfig.wrongType')
-        throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.changeConfig returns an Array but should return an object.', 'factoryConfig.changeConfig.wrongTypeArray')
+        throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.preInit returns null but should return the modified config.', 'factoryConfig.preInit.isNull')
+        throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.preInit returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.preInit.wrongType')
+        throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.preInit returns an Array but should return an object.', 'factoryConfig.preInit.wrongTypeArray')
 
 
         if (config.debug)
@@ -86,8 +87,8 @@ function runFactory(factoryConfig) {
 
 
         for (let _plugin of ctx.plugins) {
-            throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.changeConfig.returnNull");
-            throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.changeConfig.wrongType");
+            throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.preInit.returnNull");
+            throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.preInit.wrongType");
 
             ctx.log('- call hook "initPlugin" of plugin ' + _plugin.name);
             ctx.hooks.initPlugin.call(_plugin, ctx);
