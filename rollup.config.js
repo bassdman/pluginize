@@ -2,13 +2,11 @@ import { terser } from "rollup-plugin-terser";
 import resolve from '@rollup/plugin-node-resolve';
 import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
-import nodePolyfills from 'rollup-plugin-node-polyfills';
 import del from 'rollup-plugin-delete';
-
 
 export default [{
     input: 'src/index.js',
-    plugins: [del({ targets: 'dist/*' }), nodePolyfills(), commonjs(), resolve()],
+    plugins: [del({ targets: 'dist/*' }), commonjs(), resolve()],
     output: [{
         file: 'dist/pluginize.js',
         format: 'umd',
@@ -25,13 +23,15 @@ export default [{
     }]
 }, {
     input: 'src/index.js',
-    plugins: [nodePolyfills(), resolve({ browser: true }), commonjs(), babel({
-        babelHelpers: 'runtime',
-        presets: ['@babel/preset-env'],
-        plugins: [
-            "@babel/plugin-transform-runtime",
-        ]
-    })],
+    plugins: [commonjs(), resolve({ browser: true }), ,
+        babel({
+            babelHelpers: 'runtime',
+            presets: ['@babel/preset-env'],
+            plugins: [
+                "@babel/plugin-transform-runtime",
+            ]
+        })
+    ],
     output: [{
         file: 'dist/pluginize-es5.js',
         format: 'iife',

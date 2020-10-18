@@ -62,9 +62,11 @@ function runFactory(factoryConfig) {
             }
         };
 
-        const lastConfig = factoryConfig.configs[factoryConfig.configs.length - 1];
-        if (lastConfig.preInit)
-            config = lastConfig.preInit(config, ctx) || config;
+        for (let parentConfig of factoryConfig.configs) {
+            if (parentConfig.preInit)
+                parentConfig.preInit(config, ctx);
+        }
+
 
         throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.preInit returns null but should return the modified config.', 'factoryConfig.preInit.isNull')
         throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.preInit returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.preInit.wrongType')

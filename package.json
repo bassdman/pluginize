@@ -36,13 +36,12 @@
         "clean-webpack-plugin": "^3.0.0",
         "rollup": "^2.28.2",
         "rollup-plugin-delete": "^2.0.0",
-        "rollup-plugin-node-polyfills": "^0.2.1",
         "rollup-plugin-terser": "^7.0.2",
         "webpack": "^4.44.2",
         "webpack-cli": "^3.3.12",
         "webpack-karma-jasmine": "^4.0.0"
     },
     "dependencies": {
-        "clone-deep": "^4.0.1"
+        "lodash.clonedeep": "^4.5.0"
     }
 }

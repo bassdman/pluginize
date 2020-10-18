@@ -49,26 +49,6 @@ describe("pluginize(config)", function() {
         expect(result.hw2).toBe('hello world2');
     });
 
-    it("should throw an error if config.preInit returns a number", function() {
-        expect(() => {
-            pluginize({
-                preInit: function(config) {
-                    return 5;
-                }
-            }).run();
-        }).toThrow('factoryConfig.preInit.wrongType');
-    });
-
-    it("should throw an error if config.preInit returns an Array", function() {
-        expect(() => {
-            pluginize({
-                preInit: function(config) {
-                    return [];
-                }
-            }).run();
-        }).toThrow('factoryConfig.preInit.wrongTypeArray');
-    });
-
     it("should add config.test in the configattributes when config.preInit added this", function() {
         const result = pluginize({
             preInit: function(config) {
@@ -101,5 +81,14 @@ describe("pluginize(config)", function() {
 
         expect(lib1.factoryConfig.configs.length).toBe(2);
         expect(lib2.factoryConfig.configs.length).toBe(3);
+    });
+
+    it("should have 2 plugins internally when it is created after another one", function() {
+        const libRoot = pluginize({ name: 'pluginize' });
+        const lib1 = libRoot({ name: 'l1' })({ name: 'l11' });
+        const lib2 = libRoot({ name: 'l2' })({ name: 'l21' })({ name: 'l22' });
+
+        expect(lib1.factoryConfig.configs.length).toBe(3);
+        expect(lib2.factoryConfig.configs.length).toBe(4);
     });
 });
