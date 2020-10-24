@@ -4,6 +4,7 @@
     "description": "examples of pluginize",
     "main": "dist/pluginize.min.js",
     "scripts": {
+        "pretest": "npm run build",
         "test": "karma start",
         "build": "rollup --config",
         "deploy": "node ./src/index.js",

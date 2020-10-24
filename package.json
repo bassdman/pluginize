@@ -2,7 +2,7 @@
     "name": "pluginize",
     "version": "0.1.0",
     "description": "Visualize  and modify all kinds of data",
-    "main": "dist/pluginize.min.js",
+    "main": "dist/pluginize.js",
     "scripts": {
         "test": "karma start",
         "build": "rollup --config",

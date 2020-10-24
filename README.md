@@ -234,3 +234,38 @@ module.exports = {
 
     const result = myLibrary.run();
 ```
+
+Hint: it is recommended to write Plugins as a function that returns a config - so users can customize your plugin
+``` javascript
+//sayhello.plugin.js
+module.exports = function(customConfig={}){
+    return {
+        name: 'SayHelloPlugin-Customconfig',
+        init(config, pluginConfig,context) {
+            return {
+                sayHelloDefault(){
+                    if(customConfig.really == 'yes')
+                        console.log('hello ' + config.name);
+                },
+                sayHello(name) {
+                    console.log('hello ' + name);
+                }
+            }
+        }
+    }
+}
+```
+```javascript
+    // index.js
+    const sayHelloPlugin = require('./sayhello.plugin');
+    const { pluginize } = require('pluginize');
+
+    const myLibrary = pluginize({
+        //now you call the plugin as a function
+        plugins: [sayHelloPlugin({really:'yes'})]
+    });
+
+    const result = myLibrary.run();
+```
+
+## Use hooks

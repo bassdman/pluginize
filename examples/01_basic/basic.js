@@ -1,4 +1,4 @@
-const { pluginize } = require('../add-plugins/node_modules/pluginize');
+const { pluginize } = require('pluginize');
 
 const myLibrary = pluginize();
 
