@@ -3,6 +3,7 @@ import { ValidateConfigPlugin } from './plugins/validateConfig.plugin.js'
 import { ReturnPlugin } from './plugins/return.plugin.js'
 import { RenamePlugin } from './plugins/rename.plugin.js'
 import { DeletePlugin } from './plugins/delete.plugin.js'
+import { ClonePlugin } from './plugins/clone.plugin.js'
 
 const DefaultConfig = {
     name: 'DefaultPlugins',
@@ -26,6 +27,13 @@ const DefaultConfig = {
             Adds pluginize.on() and pluginize.addHooks() to the interface
         */
         new InitHooksPlugin(),
+
+        /*
+            Enables adding {
+                clone: { foo: 'bar' },
+            } to the config.
+        */
+        new ClonePlugin(),
 
         /*
             Adds pluginize.return to the interface
