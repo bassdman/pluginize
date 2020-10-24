@@ -18,7 +18,7 @@ function runPromiseFactory(factoryConfig) {
         if (conf.init) {
             throwErrorIf(typeof conf.init !== 'function', `Error in plugin "${conf.name}": config.init must be a function but is a ${typeof conf.init}`, 'config.init.wrongtype');
             ctx.log(`- Execute init() function of plugin ${conf.name}`);
-            const globals = await conf.init(conf, ctx);
+            const globals = await conf.init(ctx.config, conf, ctx);
             if (globals && !globals._context && typeof globals == 'object' && !Array.isArray(globals)) {
                 for (let key of Object.keys(globals) || {}) {
                     ctx.log('- add ' + key + ' to global context.');

@@ -41,10 +41,10 @@ and you will have
 - add custom properties / methods to your library
 ``` javascript
     const yourLibrary = pluginize({
-        init(config){
+        init(config,pluginConfig){
             return{
                 hello(name){
-                    console.log('hello' + name || config.defaultName);
+                    console.log('hello' + name || pluginConfig.defaultName);
                 }
             }
         }
@@ -180,10 +180,10 @@ Of course your library will need some functions that the users can use. Let's ad
 
 ``` javascript
     const myLibrary = pluginize({
-        init(config, context) {
+        init(config, pluginConfig, context) {
             //1st way to add sth in the context - modify the context object
             context.sayHelloDefault = function() {
-                console.log('hello ' + context.config.name);
+                console.log('hello ' + config.name);
             }
 
             //2nd way: every attribute returned will be added to the context
@@ -211,10 +211,10 @@ This is such a great feature - others should also be able to use it. Let's outso
 module.exports = {
     // Every plugin needs a name - so let's name it 'SayHelloPlugin'
     name: 'SayHelloPlugin',
-    init(config, context) {
+    init(config, pluginConfig,context) {
         return {
             sayHelloDefault(){
-                console.log('hello ' + context.config.name);
+                console.log('hello ' + config.name);
             },
             sayHello(name) {
                 console.log('hello ' + name);

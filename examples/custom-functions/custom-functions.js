@@ -1,10 +1,10 @@
 const { pluginize } = require('../add-plugins/node_modules/pluginize');
 
 const myLibrary = pluginize({
-    init(config, context) {
+    init(config, pluginConfig, context) {
         //1st way to add sth in the context - modify the context object
         context.sayHelloDefault = function() {
-            console.log('hello ' + context.config.name);
+            console.log('hello ' + config.name);
         }
 
         //2nd way: every attribute returned will be added to the context

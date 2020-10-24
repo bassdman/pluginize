@@ -24,9 +24,9 @@ function InitHooksPlugin(ctx) {
                 }
             }
         },
-        init: function(conf, ctx) {
-            if (ctx.config.hooks && ctx.config.hooks.preInitPlugin)
-                ctx.hooks.preInitPlugin.tap('preInitPlugin', ctx.config.hooks.preInitPlugin);
+        init: function(config, pluginConfig, ctx) {
+            if (config.hooks && config.hooks.preInitPlugin)
+                ctx.hooks.preInitPlugin.tap('preInitPlugin', config.hooks.preInitPlugin);
 
             return {
                 addHooks: function(obj) {

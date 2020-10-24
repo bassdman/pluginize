@@ -24,7 +24,7 @@ function pluginizeFactory(_factoryConfig = {}, staticAttributes = {}) {
         const runPromise = runPromiseFactory(factoryConfig);
         const run = runFactory(factoryConfig);
 
-        let factory = new pluginizeFactory(factoryConfig, { runPromise, run, factoryConfig: Object.assign(factoryConfig, { level: 1 }) });
+        let factory = new pluginizeFactory(factoryConfig, { runPromise, run, factoryConfig: Object.assign(factoryConfig, { level: factoryConfig.level + 1 }) });
 
         return factory;
     }
