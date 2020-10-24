@@ -172,352 +172,6 @@
         }
     }
 
-    const DefaultConfig = {
-        name: 'DefaultPlugins',
-        plugins: [
-            /*
-                Enables adding {
-                    disableKeyCheck: true|false,
-                    allowKeys: ['keyx']
-                } to the config.
-
-                Adds pluginize.on() and pluginize.addHooks() to the interface
-            */
-            new ValidateConfigPlugin(),
-
-            /*
-                Enables adding {
-                    hooks: { foo: 'bar' },
-                    addHooks: { foo: 'bar' }
-                } to the config.
-
-                Adds pluginize.on() and pluginize.addHooks() to the interface
-            */
-            new InitHooksPlugin(),
-
-            /*
-                Adds pluginize.return to the interface
-            */
-            new ReturnPlugin(),
-
-            /*
-                Enables adding {
-                    rename: { foo: 'bar' },
-                } to the config.
-            */
-            new RenamePlugin(),
-
-            /*
-                Enables adding {
-                    delete: ['foo','bar'],
-                } to the config.
-            */
-            new DeletePlugin()
-        ]
-    };
-
-    class Hook {
-        constructor() {
-            this._listeners = {};
-        }
-
-        tap(name, listener) {
-            if (name == undefined)
-                throw new Error('Hook.on(): should be on(name:string, listener:function) but name is undefined');
-            if (listener == undefined)
-                throw new Error('Hook.on(): should be on(name:string, listener:function) but listener is undefined');
-
-            this._listeners[name] = listener;
-        }
-        off(name) {
-            if (name == undefined)
-                throw new Error('Hook.off(): should be on(name:string, listener:function) but name is undefined');
-
-            delete this._listeners[name];
-        }
-        listeners(name) {
-            if (name)
-                return this._listeners[name];
-            else
-                return Object.values(this._listeners);
-        }
-    }
-
-    class SyncHook extends Hook {
-        call(ctx) {
-            const events = this.listeners();
-            for (let event of events) {
-                event(...arguments);
-            }
-        }
-    }
-
-    class AsyncHook extends Hook {
-        async promise(ctx) {
-            const events = this.listeners();
-            for (let event of events) {
-                await event(...arguments);
-            }
-        }
-    }
-
-    class SyncWaterfallHook extends Hook {
-        call(ctx) {
-            let result = ctx;
-            const events = this.listeners();
-
-            for (let event of events) {
-                if (result == null)
-                    throw new Error('A listener in SyncWaterfallHook.trigger(context) returns null. This is not allowed. Did you forget returning sth in a listener?')
-                result = event(result, ...arguments);
-            }
-            return result;
-        }
-    }
-
-    class AsyncWaterfallHook extends Hook {
-        async promise(ctx) {
-            let result = ctx;
-            const events = this.listeners();
-
-            for (let event of events) {
-                result = await event(result, ...arguments);
-            }
-            return result;
-        }
-    }
-
-    class SyncBreakableHook extends Hook {
-        call(ctx) {
-            const events = this.listeners();
-
-            for (let event of events) {
-                const result = event(...arguments);
-                if (!result)
-                    return;
-            }
-        }
-    }
-
-    class AsyncBreakableHook extends Hook {
-        async call(ctx) {
-            const events = this.listeners();
-
-            for (let event of events) {
-                const result = await event(...arguments);
-                if (!result)
-                    return;
-            }
-        }
-    }
-
-    function runPromiseFactory(factoryConfig) {
-        async function addPluginAsync(conf, ctx) {
-
-            ctx.log('- Add plugin "' + conf.name + '"');
-
-            conf = await ctx.hooks.preInitPlugin.promise(conf, ctx) || conf;
-
-            throwErrorIf(!conf.name, `Plugin ${JSON.stringify(conf)} has no name. Please define a name by adding an attribute name:"pluginname" to your plugin.`, 'plugin.noName');
-            throwErrorIf(typeof conf === 'function', `Plugin ${conf.name} is a function, but should be a configuration object. Did you forget calling it? (eg: PluginName())`, 'plugin.isFunction');
-            throwErrorIf(typeof conf !== 'object' || Array.isArray(conf), `Plugin ${conf.name} should be a configuration of type object, but is typeof ${typeof conf}.`, 'plugin.wrongType');
-
-            ctx.plugins.push(conf);
-
-            if (conf.init) {
-                throwErrorIf(typeof conf.init !== 'function', `Error in plugin "${conf.name}": config.init must be a function but is a ${typeof conf.init}`, 'config.init.wrongtype');
-                ctx.log(`- Execute init() function of plugin ${conf.name}`);
-                const globals = await conf.init(ctx.config, conf, ctx);
-                if (globals && !globals._context && typeof globals == 'object' && !Array.isArray(globals)) {
-                    for (let key of Object.keys(globals) || {}) {
-                        ctx.log('- add ' + key + ' to global context.');
-                        ctx[key] = globals[key];
-                    }
-                }
-            }
-
-            if (conf.hooks && conf.hooks.initPlugin) {
-                await ctx.hooks.initPlugin.tap(conf.name, conf.hooks.initPlugin);
-            }
-
-            throwErrorIf(conf.plugins && !Array.isArray(conf.plugins), `Error in plugin "${conf.name}": config.plugin must be an array but is an ${typeof conf.plugins}`, 'config.plugin.wrongtype');
-
-            for (let _plugin of conf.plugins || []) {
-                await addPluginAsync(_plugin, ctx);
-            }
-            return ctx;
-        }
-
-        return async function runPromise(config = {}) {
-            let ctx = {
-                plugins: [],
-                config,
-                _context: true,
-                addPlugin: addPluginAsync,
-                hooks: {
-                    return: new AsyncHook(['context']),
-                    preInitPlugin: new AsyncWaterfallHook(['config', 'context']),
-                    pluginsInitialized: new AsyncHook(['context']),
-                    initPlugin: new AsyncHook(['plugin', 'context']),
-                },
-                log() {
-                    if (config.debug)
-                        console.log(...arguments);
-                }
-            };
-
-            for (let parentConfig of factoryConfig.configs) {
-                if (parentConfig.preInit)
-                    parentConfig.preInit(config, ctx);
-            }
-
-            throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.preInit returns null but should return the modified config.', 'factoryConfig.preInit.isNull');
-            throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.preInit returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.preInit.wrongType');
-            throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.preInit returns an Array but should return an object.', 'factoryConfig.preInit.wrongTypeArray');
-
-
-            if (config.debug)
-                errorMode('development');
-
-            if (!config.name)
-                config.name = 'PluginizeAsync';
-
-            ctx.log('Starting Pluginize.');
-            await addPluginAsync(DefaultConfig, ctx);
-
-            for (let pluginTorunPromise of factoryConfig.configs)
-                await addPluginAsync(pluginTorunPromise, ctx);
-
-            await addPluginAsync(config, ctx);
-
-
-            for (let _plugin of ctx.plugins) {
-                throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.preInit.returnNull");
-                throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.preInit.wrongType");
-
-
-                ctx.log('- call hook "initPlugin" of plugin ' + _plugin.name);
-                await ctx.hooks.initPlugin.promise(_plugin, ctx);
-            }
-
-            ctx.log('- call hook "pluginsInitialized"');
-            await ctx.hooks.pluginsInitialized.promise(ctx);
-
-            await ctx.hooks.return.promise(ctx);
-
-            if (ctx.return) {
-                return ctx[ctx.return];
-            } else
-                return ctx;
-        }
-    }
-
-    function runFactory(factoryConfig) {
-        function addPluginSync(conf, ctx) {
-
-            ctx.log('- Add plugin "' + conf.name + '"');
-
-            conf = ctx.hooks.preInitPlugin.call(conf, ctx) || conf;
-
-            throwErrorIf(conf == null, `Error: Plugin is null`, 'conf.isNull');
-            throwErrorIf(!conf.name, `Plugin ${JSON.stringify(conf)} has no name. Please define a name by adding an attribute name:"pluginname" to your plugin.`, 'plugin.noName');
-            throwErrorIf(typeof conf === 'function', `Plugin ${conf.name} is a function, but should be a configuration object. Did you forget calling it? (eg: PluginName())`, 'plugin.isFunction');
-            throwErrorIf(typeof conf !== 'object' || Array.isArray(conf), `Plugin ${conf.name} should be a configuration of type object, but is typeof ${typeof conf}.`, 'plugin.wrongType');
-
-            ctx.plugins.push(conf);
-
-            if (conf.init) {
-                throwErrorIf(typeof conf.init !== 'function', `Error in plugin "${conf.name}": config.init must be a function but is a ${typeof conf.init}`, 'config.init.wrongtype');
-
-                ctx.log(`- Execute init() function of plugin ${conf.name}`);
-                const globals = conf.init(ctx.config, conf, ctx);
-
-                if (globals && !globals._context && typeof globals == 'object' && !Array.isArray(globals)) {
-                    for (let key of Object.keys(globals) || {}) {
-                        ctx.log('- add ' + key + ' to global context.');
-                        ctx[key] = globals[key];
-                    }
-                }
-
-            }
-
-            if (conf.hooks && conf.hooks.initPlugin) {
-                ctx.hooks.initPlugin.tap(conf.name, conf.hooks.initPlugin);
-            }
-
-            throwErrorIf(conf.plugins && !Array.isArray(conf.plugins), `Error in plugin "${conf.name}": config.plugin must be an array but is an ${typeof conf.plugins}`, 'config.plugin.wrongtype');
-
-            for (let _plugin of conf.plugins || []) {
-                addPluginSync(_plugin, ctx);
-            }
-
-            return ctx;
-        }
-
-        return function run(config = {}) {
-            let ctx = {
-                plugins: [],
-                config,
-                _context: true,
-                addPlugin: addPluginSync,
-                hooks: {
-                    return: new SyncHook(['context']),
-                    preInitPlugin: new SyncWaterfallHook(['config', 'context']),
-                    pluginsInitialized: new SyncHook(['context']),
-                    initPlugin: new SyncHook(['plugin', 'context']),
-                },
-                log() {
-                    if (config.debug)
-                        console.log(...arguments);
-                }
-            };
-
-            for (let parentConfig of factoryConfig.configs) {
-                if (parentConfig.preInit)
-                    parentConfig.preInit(config, ctx);
-            }
-
-
-            throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.preInit returns null but should return the modified config.', 'factoryConfig.preInit.isNull');
-            throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.preInit returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.preInit.wrongType');
-            throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.preInit returns an Array but should return an object.', 'factoryConfig.preInit.wrongTypeArray');
-
-
-            if (config.debug)
-                errorMode('development');
-
-            if (!config.name)
-                config.name = 'Pluginize';
-
-            ctx.log('Starting Pluginize.');
-            addPluginSync(DefaultConfig, ctx);
-
-            for (let pluginTorunPromise of factoryConfig.configs)
-                addPluginSync(pluginTorunPromise, ctx);
-
-            addPluginSync(config, ctx);
-
-
-            for (let _plugin of ctx.plugins) {
-                throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.preInit.returnNull");
-                throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.preInit.wrongType");
-
-                ctx.log('- call hook "initPlugin" of plugin ' + _plugin.name);
-                ctx.hooks.initPlugin.call(_plugin, ctx);
-            }
-
-            ctx.log('- call hook "pluginsInitialized"');
-            ctx.hooks.pluginsInitialized.call(ctx);
-
-            ctx.hooks.return.call(ctx);
-
-            if (ctx.return) {
-                return ctx[ctx.return];
-            } else
-                return ctx;
-        }
-    }
-
     var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
     function createCommonjsModule(fn, basedir, module) {
@@ -2284,6 +1938,391 @@
 
     module.exports = cloneDeep;
     });
+
+    function ClonePlugin() {
+        const cloned = {};
+        return {
+            allowKeys: ['clone'],
+            name: 'ClonePlugin',
+            hooks: {
+                initPlugin(config, ctx) {
+                    if (config.clone) {
+                        let newKey, oldKey;
+                        for (oldKey of Object.keys(config.clone)) {
+                            newKey = config.clone[oldKey];
+
+                            cloned[oldKey] = newKey;
+                        }
+                    }
+                },
+                return (ctx) {
+                    let newKey, oldKey;
+                    for (oldKey of Object.keys(cloned)) {
+                        newKey = cloned[oldKey];
+
+                        ctx[newKey] = lodash_clonedeep(ctx[oldKey]);
+                    }
+                },
+            },
+        }
+    }
+
+    const DefaultConfig = {
+        name: 'DefaultPlugins',
+        plugins: [
+            /*
+                Enables adding {
+                    disableKeyCheck: true|false,
+                    allowKeys: ['keyx']
+                } to the config.
+
+                Adds pluginize.on() and pluginize.addHooks() to the interface
+            */
+            new ValidateConfigPlugin(),
+
+            /*
+                Enables adding {
+                    hooks: { foo: 'bar' },
+                    addHooks: { foo: 'bar' }
+                } to the config.
+
+                Adds pluginize.on() and pluginize.addHooks() to the interface
+            */
+            new InitHooksPlugin(),
+
+            /*
+                Enables adding {
+                    clone: { foo: 'bar' },
+                } to the config.
+            */
+            new ClonePlugin(),
+
+            /*
+                Adds pluginize.return to the interface
+            */
+            new ReturnPlugin(),
+
+            /*
+                Enables adding {
+                    rename: { foo: 'bar' },
+                } to the config.
+            */
+            new RenamePlugin(),
+
+            /*
+                Enables adding {
+                    delete: ['foo','bar'],
+                } to the config.
+            */
+            new DeletePlugin()
+        ]
+    };
+
+    class Hook {
+        constructor() {
+            this._listeners = {};
+        }
+
+        tap(name, listener) {
+            if (name == undefined)
+                throw new Error('Hook.on(): should be on(name:string, listener:function) but name is undefined');
+            if (listener == undefined)
+                throw new Error('Hook.on(): should be on(name:string, listener:function) but listener is undefined');
+
+            this._listeners[name] = listener;
+        }
+        off(name) {
+            if (name == undefined)
+                throw new Error('Hook.off(): should be on(name:string, listener:function) but name is undefined');
+
+            delete this._listeners[name];
+        }
+        listeners(name) {
+            if (name)
+                return this._listeners[name];
+            else
+                return Object.values(this._listeners);
+        }
+    }
+
+    class SyncHook extends Hook {
+        call(ctx) {
+            const events = this.listeners();
+            for (let event of events) {
+                event(...arguments);
+            }
+        }
+    }
+
+    class AsyncHook extends Hook {
+        async promise(ctx) {
+            const events = this.listeners();
+            for (let event of events) {
+                await event(...arguments);
+            }
+        }
+    }
+
+    class SyncWaterfallHook extends Hook {
+        call(ctx) {
+            let result = ctx;
+            const events = this.listeners();
+
+            for (let event of events) {
+                if (result == null)
+                    throw new Error('A listener in SyncWaterfallHook.trigger(context) returns null. This is not allowed. Did you forget returning sth in a listener?')
+                result = event(result, ...arguments);
+            }
+            return result;
+        }
+    }
+
+    class AsyncWaterfallHook extends Hook {
+        async promise(ctx) {
+            let result = ctx;
+            const events = this.listeners();
+
+            for (let event of events) {
+                result = await event(result, ...arguments);
+            }
+            return result;
+        }
+    }
+
+    class SyncBreakableHook extends Hook {
+        call(ctx) {
+            const events = this.listeners();
+
+            for (let event of events) {
+                const result = event(...arguments);
+                if (!result)
+                    return;
+            }
+        }
+    }
+
+    class AsyncBreakableHook extends Hook {
+        async call(ctx) {
+            const events = this.listeners();
+
+            for (let event of events) {
+                const result = await event(...arguments);
+                if (!result)
+                    return;
+            }
+        }
+    }
+
+    function runPromiseFactory(factoryConfig) {
+        async function addPluginAsync(conf, ctx) {
+
+            ctx.log('- Add plugin "' + conf.name + '"');
+
+            conf = await ctx.hooks.preInitPlugin.promise(conf, ctx) || conf;
+
+            throwErrorIf(!conf.name, `Plugin ${JSON.stringify(conf)} has no name. Please define a name by adding an attribute name:"pluginname" to your plugin.`, 'plugin.noName');
+            throwErrorIf(typeof conf === 'function', `Plugin ${conf.name} is a function, but should be a configuration object. Did you forget calling it? (eg: PluginName())`, 'plugin.isFunction');
+            throwErrorIf(typeof conf !== 'object' || Array.isArray(conf), `Plugin ${conf.name} should be a configuration of type object, but is typeof ${typeof conf}.`, 'plugin.wrongType');
+
+            ctx.plugins.push(conf);
+
+            if (conf.init) {
+                throwErrorIf(typeof conf.init !== 'function', `Error in plugin "${conf.name}": config.init must be a function but is a ${typeof conf.init}`, 'config.init.wrongtype');
+                ctx.log(`- Execute init() function of plugin ${conf.name}`);
+                const globals = await conf.init(ctx.config, conf, ctx);
+                if (globals && !globals._context && typeof globals == 'object' && !Array.isArray(globals)) {
+                    for (let key of Object.keys(globals) || {}) {
+                        ctx.log('- add ' + key + ' to global context.');
+                        ctx[key] = globals[key];
+                    }
+                }
+            }
+
+            if (conf.hooks && conf.hooks.initPlugin) {
+                await ctx.hooks.initPlugin.tap(conf.name, conf.hooks.initPlugin);
+            }
+
+            throwErrorIf(conf.plugins && !Array.isArray(conf.plugins), `Error in plugin "${conf.name}": config.plugin must be an array but is an ${typeof conf.plugins}`, 'config.plugin.wrongtype');
+
+            for (let _plugin of conf.plugins || []) {
+                await addPluginAsync(_plugin, ctx);
+            }
+            return ctx;
+        }
+
+        return async function runPromise(config = {}) {
+            config = Object.assign(config, factoryConfig.configs[factoryConfig.configs.length - 1] || {});
+
+            let ctx = {
+                plugins: [],
+                config,
+                _context: true,
+                addPlugin: addPluginAsync,
+                hooks: {
+                    return: new AsyncHook(['context']),
+                    preInitPlugin: new AsyncWaterfallHook(['config', 'context']),
+                    pluginsInitialized: new AsyncHook(['context']),
+                    initPlugin: new AsyncHook(['plugin', 'context']),
+                },
+                log() {
+                    if (config.debug)
+                        console.log(...arguments);
+                }
+            };
+
+            for (let parentConfig of factoryConfig.configs) {
+                if (parentConfig.preInit)
+                    parentConfig.preInit(config, ctx);
+            }
+
+            throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.preInit returns null but should return the modified config.', 'factoryConfig.preInit.isNull');
+            throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.preInit returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.preInit.wrongType');
+            throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.preInit returns an Array but should return an object.', 'factoryConfig.preInit.wrongTypeArray');
+
+
+            if (config.debug)
+                errorMode('development');
+
+            if (!config.name)
+                config.name = 'PluginizeAsync';
+
+            ctx.log('Starting Pluginize.');
+            await addPluginAsync(DefaultConfig, ctx);
+
+            for (let pluginTorunPromise of factoryConfig.configs)
+                await addPluginAsync(pluginTorunPromise, ctx);
+
+            await addPluginAsync(config, ctx);
+
+
+            for (let _plugin of ctx.plugins) {
+                throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.preInit.returnNull");
+                throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.preInit.wrongType");
+
+
+                ctx.log('- call hook "initPlugin" of plugin ' + _plugin.name);
+                await ctx.hooks.initPlugin.promise(_plugin, ctx);
+            }
+
+            ctx.log('- call hook "pluginsInitialized"');
+            await ctx.hooks.pluginsInitialized.promise(ctx);
+
+            await ctx.hooks.return.promise(ctx);
+
+            if (ctx.return) {
+                return ctx[ctx.return];
+            } else
+                return ctx;
+        }
+    }
+
+    function runFactory(factoryConfig) {
+        function addPluginSync(conf, ctx) {
+
+            ctx.log('- Add plugin "' + conf.name + '"');
+
+            conf = ctx.hooks.preInitPlugin.call(conf, ctx) || conf;
+
+            throwErrorIf(conf == null, `Error: Plugin is null`, 'conf.isNull');
+            throwErrorIf(!conf.name, `Plugin ${JSON.stringify(conf)} has no name. Please define a name by adding an attribute name:"pluginname" to your plugin.`, 'plugin.noName');
+            throwErrorIf(typeof conf === 'function', `Plugin ${conf.name} is a function, but should be a configuration object. Did you forget calling it? (eg: PluginName())`, 'plugin.isFunction');
+            throwErrorIf(typeof conf !== 'object' || Array.isArray(conf), `Plugin ${conf.name} should be a configuration of type object, but is typeof ${typeof conf}.`, 'plugin.wrongType');
+
+            ctx.plugins.push(conf);
+
+            if (conf.init) {
+                throwErrorIf(typeof conf.init !== 'function', `Error in plugin "${conf.name}": config.init must be a function but is a ${typeof conf.init}`, 'config.init.wrongtype');
+
+                ctx.log(`- Execute init() function of plugin ${conf.name}`);
+                const globals = conf.init(ctx.config, conf, ctx);
+
+                if (globals && !globals._context && typeof globals == 'object' && !Array.isArray(globals)) {
+                    for (let key of Object.keys(globals) || {}) {
+                        ctx.log('- add ' + key + ' to global context.');
+                        ctx[key] = globals[key];
+                    }
+                }
+
+            }
+
+            if (conf.hooks && conf.hooks.initPlugin) {
+                ctx.hooks.initPlugin.tap(conf.name, conf.hooks.initPlugin);
+            }
+
+            throwErrorIf(conf.plugins && !Array.isArray(conf.plugins), `Error in plugin "${conf.name}": config.plugin must be an array but is an ${typeof conf.plugins}`, 'config.plugin.wrongtype');
+
+            for (let _plugin of conf.plugins || []) {
+                addPluginSync(_plugin, ctx);
+            }
+
+            return ctx;
+        }
+
+        return function run(config = {}) {
+            config = Object.assign(config, factoryConfig.configs[factoryConfig.configs.length - 1] || {});
+
+            let ctx = {
+                plugins: [],
+                config,
+                _context: true,
+                addPlugin: addPluginSync,
+                hooks: {
+                    return: new SyncHook(['context']),
+                    preInitPlugin: new SyncWaterfallHook(['config', 'context']),
+                    pluginsInitialized: new SyncHook(['context']),
+                    initPlugin: new SyncHook(['plugin', 'context']),
+                },
+                log() {
+                    if (config.debug)
+                        console.log(...arguments);
+                }
+            };
+
+            for (let parentConfig of factoryConfig.configs) {
+                if (parentConfig.preInit)
+                    parentConfig.preInit(config, ctx);
+            }
+
+
+            throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.preInit returns null but should return the modified config.', 'factoryConfig.preInit.isNull');
+            throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.preInit returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.preInit.wrongType');
+            throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.preInit returns an Array but should return an object.', 'factoryConfig.preInit.wrongTypeArray');
+
+
+            if (config.debug)
+                errorMode('development');
+
+            if (!config.name)
+                config.name = 'Pluginize';
+
+            ctx.log('Starting Pluginize.');
+            addPluginSync(DefaultConfig, ctx);
+
+            for (let pluginTorunPromise of factoryConfig.configs)
+                addPluginSync(pluginTorunPromise, ctx);
+
+            addPluginSync(config, ctx);
+
+
+            for (let _plugin of ctx.plugins) {
+                throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.preInit.returnNull");
+                throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.preInit.wrongType");
+
+                ctx.log('- call hook "initPlugin" of plugin ' + _plugin.name);
+                ctx.hooks.initPlugin.call(_plugin, ctx);
+            }
+
+            ctx.log('- call hook "pluginsInitialized"');
+            ctx.hooks.pluginsInitialized.call(ctx);
+
+            ctx.hooks.return.call(ctx);
+
+            if (ctx.return) {
+                return ctx[ctx.return];
+            } else
+                return ctx;
+        }
+    }
 
     function pluginizeFactory(_factoryConfig = {}, staticAttributes = {}) {
 
