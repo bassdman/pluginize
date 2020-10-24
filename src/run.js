@@ -45,6 +45,8 @@ function runFactory(factoryConfig) {
     }
 
     return function run(config = {}) {
+        config = Object.assign(config, factoryConfig.configs[factoryConfig.configs.length - 1] || {});
+
         let ctx = {
             plugins: [],
             config,

@@ -40,6 +40,8 @@ function runPromiseFactory(factoryConfig) {
     }
 
     return async function runPromise(config = {}) {
+        config = Object.assign(config, factoryConfig.configs[factoryConfig.configs.length - 1] || {});
+
         let ctx = {
             plugins: [],
             config,

@@ -279,6 +279,7 @@ Example: A user can add custom data via attribute "custom"
 ```javascript
 // this is the plugin - it adds the key "custom" to the context. 
 const customKeyPlugin = {
+    name: "CustomKeyPlugin",
     init(config) {
         return {
             custom: config.custom
@@ -311,6 +312,7 @@ Let's allow the attribute 'custom';
 ```javascript
 const customKeyPlugin = {
     allowKeys: ['custom'],
+    name: "CustomKeyPlugin",
     init(config) {
         return {
             custom: config.custom
@@ -336,6 +338,7 @@ disableKeycheck. If you're bored of adding keys again and again, you can disable
 const customKeyPlugin = {
     //disables the keycheck for ALL keys.
     disableKeyCheck: true,
+    name: "CustomKeyPlugin",
     init(config) {
         return {
             custom: config.custom
@@ -344,10 +347,118 @@ const customKeyPlugin = {
 };
 ```
 
-
-
 ## Change Return value
 [View an example](https://github.com/bassdman/pluginize/tree/master/examples/add-plugins)
 
+Right now pluginize().run() returns the whole context. You probably won't need the whole context but just a part of it.
+There are a few ways of changing the content: 
 
+Therefore we will use a calculation-plugin that sums up the numbers on attribute numbers
+```javascript
+    const CalculationPlugin = {
+            allowKeys: ['numbers'],
+            name: 'CalculationPlugin',
+            init(config) {
+                return {
+                    //this will sum up numbers. example: [1,2,3,4] => 10
+                    sum: config.numbers.reduce((pv, cv) => pv + cv, 0)
+                }
+            }
+        };
+```
+
+### Default return value
+When we just use this plugin, pluginize().run() will return the whole context
+```javascript
+    const myLibrary = pluginize({
+        numbers: [1,2,3,4,5,6],
+        plugins: [CalculationPlugin]
+    })
+    const result = myLibrary.run();
+    /*
+        result: {
+            // the whole context
+            ...
+                sum: 21,
+            ...
+        }
+    */
+```
+
+### Return Key
+Now we want to return a specific key of the context, not the whole context anymore - in this case the key "sum"
+```javascript
+    const myLibrary = pluginize({
+        return: 'sum',
+        numbers: [1,2,3,4,5,6],
+        plugins: [CalculationPlugin]
+    })
+    const result = myLibrary.run();
+    /*
+        result is: 21
+    */
+```
+
+### Rename Key
+Maybe we want the whole context - but the key "sum" should have another name: "newSum":
+```javascript
+    const myLibrary = pluginize({
+        rename: {
+            sum: 'newSum'
+        },
+        numbers: [1,2,3,4,5,6],
+        plugins: [CalculationPlugin]
+    })
+    const result = myLibrary.run();
+    /*
+        result: {
+            // the whole context
+            ...
+                newSum: 21,
+            ...
+        }
+    */
+```
+
+### Clone Key
+If you want to have a copy of a key (to modify the 2nd one just a little bit), you can use the key "clone"
+```javascript
+    const myLibrary = pluginize({
+        clone: {
+            sum: 'newSum'
+        },
+        numbers: [1,2,3,4,5,6],
+        plugins: [CalculationPlugin]
+    })
+    const result = myLibrary.run();
+    /*
+        result: {
+            // the whole context
+            ...
+                sum: 21,
+                newSum: 21,
+            ...
+        }
+    */
+```
+
+### Delete Key
+To delete a key from the context. 
+```javascript
+    const myLibrary = pluginize({
+        delete:  ['sum'],
+        numbers: [1,2,3,4,5,6],
+        plugins: [CalculationPlugin]
+    })
+    const result = myLibrary.run();
+    /*
+        result: {
+            // the whole context
+            ...
+                // just the default keys,
+                // sum does not exist in the context anymore
+            ...
+        }
+    */
+```
 ## Use hooks

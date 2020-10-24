@@ -25,4 +25,27 @@ describe("examples", function() {
             myLibrary.run({ name: 'heinrich' });
         }).not.toThrow();
     })
+
+    it("05_return", function() {
+        const CalculationPlugin = {
+            allowKeys: ['numbers'],
+            name: 'CalculationPlugin',
+            return: 'sum',
+            init(config, pluginConfig) {
+                console.log(config, pluginConfig)
+                return {
+                    sum: config.numbers.reduce((pv, cv) => pv + cv, 0)
+                }
+            }
+        };
+
+        const result = pluginize({
+            numbers: [1, 2, 3, 4, 5, 6],
+            plugins: [CalculationPlugin]
+        }).run();
+
+
+
+        expect(result).toBe(21);
+    })
 })

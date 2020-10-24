@@ -75,6 +75,7 @@ module.exports = function(config) {
            the ES6+ code in the test files readable to the browser  
            eg. import, export keywords */
         webpack: {
+            mode: 'development',
             module: {
                 rules: [{
                     test: /\.js$/i,
