@@ -3,7 +3,7 @@ const { pluginize } = require('pluginize');
 const customKeyPlugin = {
     return: 'customkey',
     allowKeys: ['custom'],
-    init(config) {
+    onInit(config) {
         return {
             customkey: config.custom
         }

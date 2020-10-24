@@ -1,6 +1,6 @@
 module.exports = {
     name: 'SayHelloPlugin',
-    init(config, pluginConfig, context) {
+    onInit(config, pluginConfig, context) {
         return {
             sayHelloDefault() {
                 console.log('hello ' + config.name);

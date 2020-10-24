@@ -6,7 +6,7 @@ errorMode('development');
 describe("DeletePlugin", function() {
     it("should delete context.abc", function() {
         const result = pluginize().run({
-            init() {
+            onInit() {
                 return {
                     abc: true
                 }

@@ -3,12 +3,12 @@ import { pluginize } from '../src/index.js';
 
 import { errorMode } from '../src/helpers/throwError.js';
 
-errorMode('development');
+//errorMode('development');
 
 describe("ClonePlugin", function() {
     it("should add context.abc", function() {
         const result = pluginize().run({
-            init() {
+            onInit() {
                 return {
                     abc: true
                 }
@@ -22,7 +22,7 @@ describe("ClonePlugin", function() {
 
     it("should still have a defined key 'abc'", function() {
         const result = pluginize().run({
-            init() {
+            onInit() {
                 return {
                     abc: true
                 }
@@ -36,7 +36,7 @@ describe("ClonePlugin", function() {
 
     it("should not change clone.x when changing source.x - the key should be a copy", function() {
         const result = pluginize().run({
-            init() {
+            onInit() {
                 return {
                     source: {
                         x: 5

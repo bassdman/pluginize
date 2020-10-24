@@ -41,7 +41,7 @@ and you will have
 - add custom properties / methods to your library
 ``` javascript
     const yourLibrary = pluginize({
-        init(config,pluginConfig){
+        onInit(config,pluginConfig){
             return{
                 hello(name){
                     console.log('hello' + name || pluginConfig.defaultName);
@@ -62,7 +62,7 @@ and you will have
                 // do sth when all plugins are initialized
             }
         },
-        init(){
+        onInit(){
 
         }
     });
@@ -100,7 +100,7 @@ and you will have
         addHooks: {
             after5Seconds: new SyncHook() // don't worry about the hooks - your will learn more about them later
         },
-        init(){
+        onInit(){
             setTimeout(function(config,ctx){
                 ctx.hooks.after5Seconds.call('5 seconds later');
             }, 5000)
@@ -180,7 +180,7 @@ Of course your library will need some functions that the users can use. Let's ad
 
 ``` javascript
     const myLibrary = pluginize({
-        init(config, pluginConfig, context) {
+        onInit(config, pluginConfig, context) {
             //1st way to add sth in the context - modify the context object
             context.sayHelloDefault = function() {
                 console.log('hello ' + config.name);
@@ -211,7 +211,7 @@ This is such a great feature - others should also be able to use it. Let's outso
 module.exports = {
     // Every plugin needs a name - so let's name it 'SayHelloPlugin'
     name: 'SayHelloPlugin',
-    init(config, pluginConfig,context) {
+    onInit(config, pluginConfig,context) {
         return {
             sayHelloDefault(){
                 console.log('hello ' + config.name);
@@ -241,7 +241,7 @@ Hint: it is recommended to write Plugins as a function that returns a config - s
 module.exports = function(customConfig={}){
     return {
         name: 'SayHelloPlugin-Customconfig',
-        init(config, pluginConfig,context) {
+        onInit(config, pluginConfig,context) {
             return {
                 sayHelloDefault(){
                     if(customConfig.really == 'yes')
@@ -280,7 +280,7 @@ Example: A user can add custom data via attribute "custom"
 // this is the plugin - it adds the key "custom" to the context. 
 const customKeyPlugin = {
     name: "CustomKeyPlugin",
-    init(config) {
+    onInit(config) {
         return {
             custom: config.custom
         }
@@ -313,7 +313,7 @@ Let's allow the attribute 'custom';
 const customKeyPlugin = {
     allowKeys: ['custom'],
     name: "CustomKeyPlugin",
-    init(config) {
+    onInit(config) {
         return {
             custom: config.custom
         }
@@ -339,7 +339,7 @@ const customKeyPlugin = {
     //disables the keycheck for ALL keys.
     disableKeyCheck: true,
     name: "CustomKeyPlugin",
-    init(config) {
+    onInit(config) {
         return {
             custom: config.custom
         }
@@ -358,7 +358,7 @@ Therefore we will use a calculation-plugin that sums up the numbers on attribute
     const CalculationPlugin = {
             allowKeys: ['numbers'],
             name: 'CalculationPlugin',
-            init(config) {
+            onInit(config) {
                 return {
                     //this will sum up numbers. example: [1,2,3,4] => 10
                     sum: config.numbers.reduce((pv, cv) => pv + cv, 0)

@@ -3,7 +3,7 @@ export default function() {
     let libraryType = "object";
 
     return {
-        init(config) {
+        onInit(config) {
 
         },
         resolve(val) {

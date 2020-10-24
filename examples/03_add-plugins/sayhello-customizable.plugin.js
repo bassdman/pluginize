@@ -1,7 +1,7 @@
 module.exports = function(customConfig = {}) {
     return {
         name: 'SayHelloPlugin-Customconfig',
-        init(config, pluginConfig, context) {
+        onInit(config, pluginConfig, context) {
             return {
                 sayHelloDefaultCustom() {
                     if (customConfig.really == 'yes')

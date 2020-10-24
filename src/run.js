@@ -16,11 +16,11 @@ function runFactory(factoryConfig) {
 
         ctx.plugins.push(conf);
 
-        if (conf.init) {
-            throwErrorIf(typeof conf.init !== 'function', `Error in plugin "${conf.name}": config.init must be a function but is a ${typeof conf.init}`, 'config.init.wrongtype')
+        if (conf.onInit) {
+            throwErrorIf(typeof conf.onInit !== 'function', `Error in plugin "${conf.name}": config.onInit must be a function but is a ${typeof conf.onInit}`, 'config.onInit.wrongtype')
 
-            ctx.log(`- Execute init() function of plugin ${conf.name}`);
-            const globals = conf.init(ctx.config, conf, ctx);
+            ctx.log(`- Execute onInit() function of plugin ${conf.name}`);
+            const globals = conf.onInit(ctx.config, conf, ctx);
 
             if (globals && !globals._context && typeof globals == 'object' && !Array.isArray(globals)) {
                 for (let key of Object.keys(globals) || {}) {
@@ -65,8 +65,8 @@ function runFactory(factoryConfig) {
         };
 
         for (let parentConfig of factoryConfig.configs) {
-            if (parentConfig.preInit)
-                parentConfig.preInit(config, ctx);
+            if (parentConfig.onPreInit)
+                parentConfig.onPreInit(config, ctx);
         }
 
 

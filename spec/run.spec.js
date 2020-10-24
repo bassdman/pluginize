@@ -35,19 +35,19 @@ describe("pluginize().run(config)", function() {
             return pluginize().run({ plugins: {} });
         }).toThrow('config.plugin.wrongtype');
     });
-    it("should not throw an error for attribute init", function() {
+    it("should not throw an error for attribute onInit", function() {
         expect(() => {
-            return pluginize().run({ init: function() {} });
+            return pluginize().run({ onInit: function() {} });
         }).not.toThrow();
     });
-    it("should throw an error for attribute init if it is not a function", function() {
+    it("should throw an error for attribute onInit if it is not a function", function() {
         expect(() => {
-            return pluginize().run({ init: {} });
-        }).toThrow('config.init.wrongtype');
+            return pluginize().run({ onInit: {} });
+        }).toThrow('config.onInit.wrongtype');
     });
     it("should add function xy to the context if it is returend in initfunction", function() {
         const result = pluginize().run({
-            init: function() {
+            onInit: function() {
                 return {
                     abc: function() {}
                 }
@@ -55,11 +55,11 @@ describe("pluginize().run(config)", function() {
         });
         expect(typeof result.abc).toBe('function');
     });
-    it("should ignore other return types then object for init function", function() {
+    it("should ignore other return types then object for onInit function", function() {
 
         expect(() => {
             pluginize().run({
-                init: function() {
+                onInit: function() {
                     return 5;
                 }
             });

@@ -3,7 +3,7 @@ import { pluginize } from '../src/index.js';
 describe("examples", function() {
     it("04_hooks", function() {
         const myLibrary = pluginize({
-            init(config, pluginConfig, context) {
+            onInit(config, pluginConfig, context) {
                 //1st way to add sth in the context - modify the context object
                 context.sayHelloDefault = function() {
                     console.log('hello ' + config.name);
@@ -18,8 +18,6 @@ describe("examples", function() {
             }
         });
 
-
-
         expect(() => {
             //now our result includes these two functions 
             myLibrary.run({ name: 'heinrich' });
@@ -31,7 +29,7 @@ describe("examples", function() {
             allowKeys: ['numbers'],
             name: 'CalculationPlugin',
             return: 'sum',
-            init(config, pluginConfig) {
+            onInit(config, pluginConfig) {
                 console.log(config, pluginConfig)
                 return {
                     sum: config.numbers.reduce((pv, cv) => pv + cv, 0)

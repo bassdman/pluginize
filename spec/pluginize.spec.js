@@ -1,7 +1,7 @@
 import { pluginize } from '../src/index.js';
 import { errorMode } from '../src/helpers/throwError.js';
 
-errorMode('development');
+//errorMode('development');
 
 describe("pluginize(config)", function() {
     it("should be typeof function", function() {
@@ -19,7 +19,7 @@ describe("pluginize(config)", function() {
     it("should return 'hello world' if pluginize(config) initializes it and run() is called without parameter", function() {
         const result = pluginize({
             return: 'helloworld',
-            init() {
+            onInit() {
                 return {
                     helloworld: 'hello world'
                 }
@@ -32,13 +32,13 @@ describe("pluginize(config)", function() {
     it("should return 'hello world' in key 'hw1' and 'hw2' when pluginize() is called with array of configs", function() {
         const result = pluginize(
             [{
-                init() {
+                onInit() {
                     return {
                         hw1: 'hello world1'
                     }
                 }
             }, {
-                init() {
+                onInit() {
                     return {
                         hw2: 'hello world2'
                     }
@@ -51,7 +51,7 @@ describe("pluginize(config)", function() {
 
     it("should add config.test in the configattributes when config.preInit added this", function() {
         const result = pluginize({
-            preInit: function(config) {
+            onPreInit: function(config) {
                 config.test = config._test;
                 delete config._test;
 
@@ -68,7 +68,7 @@ describe("pluginize(config)", function() {
     });
 
     it("should have 1 plugin internally for each of two called pluginze-functions", function() {
-        const lib1 = pluginize({ init() {} });
+        const lib1 = pluginize({ onInit() {} });
         const lib2 = pluginize();
 
         expect(lib1.factoryConfig.configs.length).toBe(1);

@@ -1,7 +1,7 @@
 const { pluginize } = require('pluginize');
 
 const myLibrary = pluginize({
-    xinit(config, pluginConfig, context) {
+    xonInit(config, pluginConfig, context) {
         //1st way to add sth in the context - modify the context object
         context.sayHelloDefault = function() {
             console.log('hello ' + config.name);

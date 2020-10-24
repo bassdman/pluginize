@@ -26,15 +26,15 @@ describe("pluginize.runPromise(config):", function() {
         await expectAsync(pluginize().runPromise({ plugins: {} })).toBeRejected('config.plugin.wrongtype');
     });
 
-    it("should not throw an error for attribute init", async function() {
-        await expectAsync(pluginize().runPromise({ init: function() {} })).toBeResolved();
+    it("should not throw an error for attribute onInit", async function() {
+        await expectAsync(pluginize().runPromise({ onInit: function() {} })).toBeResolved();
     });
-    it("should throw an error for attribute init if it is not a function", async function() {
-        await expectAsync(pluginize().runPromise({ init: {} })).toBeRejected('config.init.wrongtype');
+    it("should throw an error for attribute onInit if it is not a function", async function() {
+        await expectAsync(pluginize().runPromise({ onInit: {} })).toBeRejected('config.onInit.wrongtype');
     });
     it("should add function xy to the context if it is returend in initfunction", async function() {
         const result = await pluginize().runPromise({
-            init: function() {
+            onInit: function() {
                 return {
                     abc: function() {}
                 }
@@ -42,8 +42,8 @@ describe("pluginize.runPromise(config):", function() {
         });
         expect(typeof result.abc).toBe('function');
     });
-    it("should ignore other return types then object for init function", async function() {
-        await expectAsync(pluginize().runPromise({ init: function() { return 5; } })).toBeResolved();
+    it("should ignore other return types then object for onInit function", async function() {
+        await expectAsync(pluginize().runPromise({ onInit: function() { return 5; } })).toBeResolved();
     });
 
 
@@ -112,7 +112,7 @@ describe("pluginize.runPromise(config):", function() {
     it("should return'hello world' if config-attribute 'return' is 'helloworld' with context.helloworld = 'hello world'", async function() {
         const result = await pluginize().runPromise({
             return: 'helloworld',
-            init() {
+            onInit() {
                 return {
                     helloworld: 'hello world'
                 }

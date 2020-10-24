@@ -14,7 +14,7 @@ it("should not throw an error if config-attribute 'return' is set", function() {
 it("should return'hello world' if config-attribute 'return' is 'helloworld' with context.helloworld = 'hello world'", function() {
     const result = pluginize().run({
         return: 'helloworld',
-        init() {
+        onInit() {
             return {
                 helloworld: 'hello world'
             }
