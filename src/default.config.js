@@ -9,7 +9,7 @@ const DefaultConfig = {
     plugins: [
         /*
             Enables adding {
-                desactivateKeyCheck: true|false,
+                disableKeyCheck: true|false,
                 allowKeys: ['keyx']
             } to the config.
 

@@ -126,7 +126,7 @@ and you will have
 Let's create a library together, step by step. So you will learn all features of pluginize.
 
 # Preparation
-[View some examples](https://github.com/bassdman/pluginize/tree/master/examples/basic)
+[View some examples](https://github.com/bassdman/pluginize/tree/master/examples/01_basic)
 
 Get the package
 ``` shell
@@ -166,7 +166,7 @@ both results will look like this
     initPlugin: SyncHook { }
   },
   log: [Function], //you can log sth with result.log(xxx)
-  desactivateKeyCheck: [Function], 
+  disableKeyCheck: [Function], 
   addHooks: [Function], // you can add hooks with result.addHooks
   on: [Function] // you can listen to hooks with result.on()
 }
@@ -174,7 +174,7 @@ both results will look like this
 Yippie we have built our first library. But it does look how we want it. Let's change it.
 
 ## Add custom functions
-[View an example](https://github.com/bassdman/pluginize/tree/master/examples/custom-functions)
+[View an example](https://github.com/bassdman/pluginize/tree/master/examples/02_custom-functions)
 
 Of course your library will need some functions that the users can use. Let's add some.
 
@@ -202,7 +202,7 @@ Of course your library will need some functions that the users can use. Let's ad
 ```
 
 ## Add Plugins
-[View an example](https://github.com/bassdman/pluginize/tree/master/examples/add-plugins)
+[View an example](https://github.com/bassdman/pluginize/tree/master/examples/03_add-plugins)
 
 This is such a great feature - others should also be able to use it. Let's outsource it as a plugin.
 
@@ -267,5 +267,87 @@ module.exports = function(customConfig={}){
 
     const result = myLibrary.run();
 ```
+
+## Custom Keys
+
+[View an example](https://github.com/bassdman/pluginize/tree/master/examples/04_custom-keys)
+
+Now we want to add some customized beavior. 
+Let's add custom data to the context, that the user can add via config
+
+Example: A user can add custom data via attribute "custom" 
+```javascript
+// this is the plugin - it adds the key "custom" to the context. 
+const customKeyPlugin = {
+    init(config) {
+        return {
+            custom: config.custom
+        }
+    },
+};
+
+// the user adds the string 'heinrich' to the custom context
+const myLibrary = pluginize({
+    custom: 'heinrich',
+    plugins: [customKeyPlugin]
+})
+const result = myLibrary.run();
+/*
+    result should be: {
+        ...
+            custom: 'heinrich'
+        ...
+    }
+*/
+```
+But wait... there is an error: 
+```
+Config attribute "custom" is used but not allowed. Allowed are ...
+```
+By Default just a few keys are allowed via for the config - we must whitelist new ones
+
+### Recommended way
+Let's allow the attribute 'custom';
+```javascript
+const customKeyPlugin = {
+    allowKeys: ['custom'],
+    init(config) {
+        return {
+            custom: config.custom
+        }
+    },
+};
+```
+
+Now the plugin works as expected.
+
+:warning: Prooving Nested keys is not (yet) supported. 
+```javascript
+// this does not work you have to validate these keys by yourself
+{ 
+    allowKeys['custom.a','custom.b']
+}
+```
+
+### Additional way
+(not recommended, but possible)
+disableKeycheck. If you're bored of adding keys again and again, you can disable this check. Then the user can add anything to the config without any error that is thrown.
+```javascript
+const customKeyPlugin = {
+    //disables the keycheck for ALL keys.
+    disableKeyCheck: true,
+    init(config) {
+        return {
+            custom: config.custom
+        }
+    },
+};
+```
+
+
+
+## Change Return value
+[View an example](https://github.com/bassdman/pluginize/tree/master/examples/add-plugins)
+
 
 ## Use hooks

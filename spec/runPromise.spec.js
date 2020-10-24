@@ -95,14 +95,14 @@ describe("pluginize.runPromise(config):", function() {
             }
         })).toBeResolved();
     });
-    it("should not throw an error if invalid configattribute xyabc is added and config.desactivateKeyCheck == true", async function() {
-        await expectAsync(pluginize().runPromise({ xyabc: true, desactivateKeyCheck: true })).toBeResolved();
+    it("should not throw an error if invalid configattribute xyabc is added and config.disableKeyCheck == true", async function() {
+        await expectAsync(pluginize().runPromise({ xyabc: true, disableKeyCheck: true })).toBeResolved();
     });
 
-    it("should have a function desactivateKeyCheck in context", async function() {
+    it("should have a function disableKeyCheck in context", async function() {
         const result = await pluginize().runPromise();
 
-        expect(result.desactivateKeyCheck).toBeDefined();
+        expect(result.disableKeyCheck).toBeDefined();
     });
 
     it("should not throw an error if config-attribute 'return' is set", async function() {

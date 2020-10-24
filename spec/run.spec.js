@@ -125,16 +125,16 @@ describe("pluginize().run(config)", function() {
             });
         }).not.toThrow();
     });
-    it("should not throw an error if invalid configattribute xyabc is added and config.desactivateKeyCheck == true", function() {
+    it("should not throw an error if invalid configattribute xyabc is added and config.disableKeyCheck == true", function() {
         expect(() => {
-            return pluginize().run({ xyabc: true, desactivateKeyCheck: true });
+            return pluginize().run({ xyabc: true, disableKeyCheck: true });
         }).not.toThrow();
     });
 
-    it("should have a function desactivateKeyCheck in context", function() {
+    it("should have a function disableKeyCheck in context", function() {
         const result = pluginize().run();
 
-        expect(result.desactivateKeyCheck).toBeDefined();
+        expect(result.disableKeyCheck).toBeDefined();
     });
 
     describe('config.hooks.preInitPlugin', function() {

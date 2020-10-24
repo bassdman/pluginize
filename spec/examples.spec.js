@@ -1,7 +1,7 @@
 import { pluginize } from '../src/index.js';
 
 describe("examples", function() {
-    fit("04_hooks", function() {
+    it("04_hooks", function() {
         const myLibrary = pluginize({
             init(config, pluginConfig, context) {
                 //1st way to add sth in the context - modify the context object
@@ -18,7 +18,11 @@ describe("examples", function() {
             }
         });
 
-        //now our result includes these two functions 
-        myLibrary.run({ name: 'heinrich' });
+
+
+        expect(() => {
+            //now our result includes these two functions 
+            myLibrary.run({ name: 'heinrich' });
+        }).not.toThrow();
     })
 })
