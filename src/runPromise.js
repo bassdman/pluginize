@@ -27,8 +27,8 @@ function runPromiseFactory(factoryConfig) {
             }
         }
 
-        if (conf.hooks && conf.hooks.onInitPlugin) {
-            await ctx.hooks.onInitPlugin.tap(conf.name, conf.hooks.onInitPlugin);
+        if (conf.onInitPlugin) {
+            await ctx.onInitPlugin.tap(conf.name, conf.onInitPlugin);
         }
 
         throwErrorIf(conf.plugins && !Array.isArray(conf.plugins), `Error in plugin "${conf.name}": config.plugin must be an array but is an ${typeof conf.plugins}`, 'config.plugin.wrongtype');
@@ -47,11 +47,11 @@ function runPromiseFactory(factoryConfig) {
             config,
             _context: true,
             addPlugin: addPluginAsync,
+            onInitPlugin: new AsyncHook(['plugin', 'context']),
             hooks: {
                 onReturn: new AsyncHook(['context']),
                 onPreInitPlugin: new AsyncWaterfallHook(['config', 'context']),
                 onPluginsInitialized: new AsyncHook(['context']),
-                onInitPlugin: new AsyncHook(['plugin', 'context']),
             },
             log() {
                 if (config.debug)
@@ -90,7 +90,7 @@ function runPromiseFactory(factoryConfig) {
 
 
             ctx.log('- call hook "onInitPlugin" of plugin ' + _plugin.name);
-            await ctx.hooks.onInitPlugin.promise(_plugin, ctx);
+            await ctx.onInitPlugin.promise(_plugin, ctx);
         }
 
         ctx.log('- call hook "onPluginsInitialized"');

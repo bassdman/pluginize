@@ -87,9 +87,7 @@ describe("pluginize().run(config)", function() {
     it("should have a hook called 'onInitPlugin'", function() {
         expect(() => {
             return pluginize().run({
-                hooks: {
-                    onInitPlugin: function() {}
-                }
+                onInitPlugin: function() {}
             });
         }).not.toThrow();
     });
@@ -147,15 +145,16 @@ describe("pluginize().run(config)", function() {
         it("should be called before 'onInitPlugin'", function() {
             const order = [];
             pluginize().run({
+                onInitPlugin() {
+                    if (!order.includes('onInitPlugin'))
+                        order.push('onInitPlugin');
+                },
                 hooks: {
                     onPreInitPlugin() {
                         if (!order.includes('onPreInitPlugin'))
                             order.push('onPreInitPlugin');
                     },
-                    onInitPlugin() {
-                        if (!order.includes('onInitPlugin'))
-                            order.push('onInitPlugin');
-                    }
+
                 }
             });
 

@@ -65,9 +65,7 @@ describe("pluginize.runPromise(config):", function() {
     });
     it("should have a hook called 'onInitPlugin'", async function() {
         await expectAsync(pluginize().runPromise({
-            hooks: {
-                onInitPlugin: function() {}
-            }
+            onInitPlugin: function() {}
         })).toBeResolved();
     });
     it("should have a hook called 'onPluginsInitialized'", async function() {
@@ -132,15 +130,16 @@ describe("pluginize.runPromise(config):", function() {
         it("should be called before 'onInitPlugin'", async function() {
             const order = [];
             await pluginize().runPromise({
+                onInitPlugin() {
+                    if (!order.includes('onInitPlugin'))
+                        order.push('onInitPlugin');
+                },
                 hooks: {
                     onPreInitPlugin() {
                         if (!order.includes('onPreInitPlugin'))
                             order.push('onPreInitPlugin');
                     },
-                    onInitPlugin() {
-                        if (!order.includes('onInitPlugin'))
-                            order.push('onInitPlugin');
-                    }
+
                 }
             });
 

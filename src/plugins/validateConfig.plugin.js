@@ -2,19 +2,19 @@ import { throwError } from '../helpers/throwError.js';
 
 
 function ValidateConfigPlugin() {
-    const usedKeys = ['name', 'hooks', 'onInit', 'onPreInit', 'allowKeys', 'disableKeyCheck', 'plugins', 'debug', 'preInit'];
+    const usedKeys = ['name', 'hooks', 'onInit', 'onPreInit', 'allowKeys', 'disableKeyCheck', 'plugins', 'debug', 'onInitPlugin'];
     let disableKeyCheck = false;
 
     return {
         name: 'ValidateConfigPlugin',
-        hooks: {
-            onInitPlugin(config, ctx) {
-                if (config.allowKeys)
-                    usedKeys.push(...config.allowKeys);
+        onInitPlugin(config, ctx) {
+            if (config.allowKeys)
+                usedKeys.push(...config.allowKeys);
 
-                if (config.disableKeyCheck)
-                    disableKeyCheck = config.disableKeyCheck;
-            },
+            if (config.disableKeyCheck)
+                disableKeyCheck = config.disableKeyCheck;
+        },
+        hooks: {
             onPluginsInitialized(ctx) {
                 if (disableKeyCheck)
                     return;

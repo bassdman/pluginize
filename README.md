@@ -54,14 +54,12 @@ and you will have
 - the chance to hook in every process of your library (and of course of the plugins, too)
 ``` javascript
     yourLibrary.runPromise({
-        hooks: {
-            onInitPlugin(config){
-                //do sth when your library / the plugins are initialized
-            },
-            onPluginsInitialized(){
-                // do sth when all plugins are initialized
-            }
+        onInitPlugin(config){
+            //do sth when your library / the plugins are initialized
         },
+        onPluginsInitialized(){
+            // do sth when all plugins are initialized
+        }
         onInit(){
 
         }
@@ -155,20 +153,18 @@ now we create our first library that does (almost) nothing.
 both results will look like this
 ``` javascript
 {
-  plugins: [ /*some internal plugins*/  ],
-  config: { name: 'Pluginize' },
-  _context: true,
-  addPlugin: [Function],
-  hooks: {
+    plugins: [ /*some internal plugins*/  ],
+    config: { name: 'Pluginize' },
+    _context: true,
+    addPlugin: [Function],
     onReturn: SyncHook {  },
     onPreInitPlugin: SyncWaterfallHook {},
     onPluginsInitialized: SyncHook {  },
     onInitPlugin: SyncHook { }
-  },
-  log: [Function], //you can log sth with result.log(xxx)
-  disableKeyCheck: [Function], 
-  addHooks: [Function], // you can add hooks with result.addHooks
-  on: [Function] // you can listen to hooks with result.on()
+    log: [Function], //you can log sth with result.log(xxx)
+    disableKeyCheck: [Function], 
+    addHooks: [Function], // you can add hooks with result.addHooks
+    on: [Function] // you can listen to hooks with result.on()
 }
 ```
 Yippie we have built our first library. But it does look how we want it. Let's change it.
