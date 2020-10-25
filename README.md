@@ -24,7 +24,7 @@ Just write this line of code
 and you will have
 - the ability to add Plugins
 ``` javascript
-    yourLibrary.runPromise({
+    yourLibrary.run({
         plugins:[pluginA, pluginB,..]
     })
 ```
@@ -34,7 +34,7 @@ and you will have
         // add pluginconfiguration here
         plugins: [nestedPlugin1,nestedPlugin2];
     }
-    yourLibrary.runPromise({
+    yourLibrary.run({
         plugins:[plugin]
     });
 ```
@@ -51,6 +51,14 @@ and you will have
     })
 ```
 
+- run your library asynchronous
+``` javascript
+    const yourLibrary = pluginize({
+        //some config
+    });
+    const result = await yourLibrary.runPromise();
+```
+
 - the chance to hook in every process of your library (and of course of the plugins, too)
 ``` javascript
     yourLibrary.runPromise({
@@ -61,15 +69,12 @@ and you will have
             // do sth when all plugins are initialized
         }
         onInit(){
-
+            // do sth on init
         }
+        ...
     });
 ```
-- choose how your library will be used
-``` javascript
-    //instead of an object with an runPromise-function it could also be a function
-    yourLibrary(/*here comes the config*/);
-```
+
 - choose what your plugin returns
 ``` javascript
     //default: a library returns an object (the context) - but you can modify it
@@ -87,7 +92,7 @@ and you will have
     });
 
     //now returns whatever you want instead of the default output
-    const output yourLibrary.runPromise(config);
+    const output yourLibrary.run(config);
 ```
 - add your hooks that can be used
 ``` javascript
@@ -99,7 +104,7 @@ and you will have
             }, 5000);
 
             return {
-                after5Seconds: new SyncHook() // don't worry about the hooks - your will learn more about them later
+                after5Seconds: pluginize.SyncHook() // don't worry about the hooks - your will learn more about them later
             }
         }
     });
@@ -136,7 +141,7 @@ or as a script
     <!-- you can find the files in dist/pluginize.min.js" in this repository>-->
     <script src="path/to/pluginize.min.js"></script>
 ```
-now we create our first library that does (almost) nothing.
+As a first step we create our first library that does (almost) nothing.
 ``` javascript
     const myLibrary = pluginize();
 
@@ -147,7 +152,7 @@ now we create our first library that does (almost) nothing.
     const asyncResult = await myLibrary.runPromise();
 ```
 
-both results will look like this
+Both results will look similar to this
 ``` javascript
 {
     plugins: [ /*some internal plugins*/  ],
@@ -163,34 +168,38 @@ both results will look like this
     on: [Function] // you can listen to hooks with result.on()
 }
 ```
-Yippie we have built our first library. But it does look how we want it. Let's change it.
+Yippie we have built our first library. But it does not do what we want. Let's change it.
 
 ## Add custom functions
 [View an example](https://github.com/bassdman/pluginize/tree/master/examples/02_custom-functions)
 
-Of course your library will need some functions that the users can use. Let's add some.
+Of course your library will need some functions that the users can use. Let's add some. We will create a small Mathlibrary with useful helperfunctions.
 
 ``` javascript
     const myLibrary = pluginize({
+        name: "MathLibrary",
         onInit(config, pluginConfig, context) {
             //1st way to add sth in the context - modify the context object
-            context.sayHelloDefault = function() {
-                console.log('hello ' + config.name);
+            context.add = function(a,b) {
+                return a + b;
             }
+
+            context.pluginname = config.name;
 
             //2nd way: every attribute returned will be added to the context
             return {
-                sayHello(name) {
-                    console.log('hello ' + name);
+                multiply(a,b) {
+                    return a * b;
                 }
             }
         }
     });
 
     //now our result includes these two functions
-    const result = myLibrary.runPromise({name: 'heinrich'});
-    result.sayHelloDefault(); // hello heinrich
-    result.sayHello('Peter'); // hello peter
+    const result = myLibrary.run({name: 'heinrich'});
+    result.add(1,2); // = 3
+    result.multiply(1,2); // = 2
+    result.pluginname; // = MathLibrary
 ```
 
 ## Add Plugins
@@ -199,17 +208,20 @@ Of course your library will need some functions that the users can use. Let's ad
 This is such a great feature - others should also be able to use it. Let's outsource it as a plugin.
 
 ``` javascript
-//sayhello.plugin.js
+//math.plugin.js
 module.exports = {
-    // Every plugin needs a name - so let's name it 'SayHelloPlugin'
-    name: 'SayHelloPlugin',
+    // Every plugin needs a name - so let's name it 'MathLibraryPlugin'
+    name: 'MathLibraryPlugin',
     onInit(config, pluginConfig,context) {
+        context.add = function(a,b) {
+            return a + b;
+        }
+
+        context.pluginname = config.name;
+
         return {
-            sayHelloDefault(){
-                console.log('hello ' + config.name);
-            },
-            sayHello(name) {
-                console.log('hello ' + name);
+            multiply(a,b) {
+                return a * b;
             }
         }
     }
@@ -217,14 +229,17 @@ module.exports = {
 ```
 ```javascript
     // index.js
-    const sayHelloPlugin = require('./sayhello.plugin');
+    const MathLibraryPlugin = require('./math.plugin');
     const { pluginize } = require('pluginize');
 
     const myLibrary = pluginize({
-        plugins: [sayHelloPlugin]
+        plugins: [MathLibraryPlugin]
     });
 
     const result = myLibrary.run();
+    result.add(1,2); // = 3
+    result.multiply(1,2); // = 2
+    result.pluginname; // = MathLibrary
 ```
 
 Hint: it is recommended to write Plugins as a function that returns a config - so users can customize your plugin
@@ -232,15 +247,16 @@ Hint: it is recommended to write Plugins as a function that returns a config - s
 //sayhello.plugin.js
 module.exports = function(customConfig={}){
     return {
-        name: 'SayHelloPlugin-Customconfig',
+        name: 'MathLibraryPlugin-Customconfig',
         onInit(config, pluginConfig,context) {
+            // for a better readability we initialized all in the return value. But it is still valid like written above. 
             return {
-                sayHelloDefault(){
-                    if(customConfig.really == 'yes')
-                        console.log('hello ' + config.name);
+                pluginname: customConfig.namePrefix + config.name,
+                add(a,b){
+                    return a + b;
                 },
-                sayHello(name) {
-                    console.log('hello ' + name);
+                multiply(a,b) {
+                    return a * b;
                 }
             }
         }
@@ -249,15 +265,18 @@ module.exports = function(customConfig={}){
 ```
 ```javascript
     // index.js
-    const sayHelloPlugin = require('./sayhello.plugin');
+    const MathLibraryPlugin = require('./math.plugin');
     const { pluginize } = require('pluginize');
 
     const myLibrary = pluginize({
         //now you call the plugin as a function
-        plugins: [sayHelloPlugin({really:'yes'})]
+        plugins: [ MathLibraryPlugin({namePrefix:'the real '}) ]
     });
 
     const result = myLibrary.run();
+    result.add(1,2); // = 3
+    result.multiply(1,2); // = 2
+    result.pluginname; // = the real MathLibrary
 ```
 
 ## Custom Keys
@@ -281,14 +300,14 @@ const customKeyPlugin = {
 
 // the user adds the string 'heinrich' to the custom context
 const myLibrary = pluginize({
-    custom: 'heinrich',
+    custom: function(){/*a user defined function*/},
     plugins: [customKeyPlugin]
 })
 const result = myLibrary.run();
 /*
     result should be: {
         ...
-            custom: 'heinrich'
+            custom: function(){/*the user defined function*/},
         ...
     }
 */
@@ -345,7 +364,7 @@ const customKeyPlugin = {
 Right now pluginize().run() returns the whole context. You probably won't need the whole context but just a part of it.
 There are a few ways of changing the content: 
 
-Therefore we will use a calculation-plugin that sums up the numbers on attribute numbers
+Therefore we will use an advanced version of the MathLibraryPlugin - the CalculationPlugin. It sums up the numbers entered on config-attribute "numbers" and writes it into the context-attribute "sum".
 ```javascript
     const CalculationPlugin = {
             allowKeys: ['numbers'],
@@ -378,7 +397,7 @@ When we just use this plugin, pluginize().run() will return the whole context
 ```
 
 ### Return Key
-Now we want to return a specific key of the context, not the whole context anymore - in this case the key "sum"
+Now we want to return a specific key of the context, not the whole context anymore - in this case the key "sum".
 ```javascript
     const myLibrary = pluginize({
         return: 'sum',
@@ -413,7 +432,7 @@ Maybe we want the whole context - but the key "sum" should have another name: "n
 ```
 
 ### Clone Key
-If you want to have a copy of a key (to modify the 2nd one just a little bit), you can use the key "clone"
+Sometimes it is good to have a copy of a key (to modify the 2nd one just a little bit) - therefore you can use the key "clone".
 ```javascript
     const myLibrary = pluginize({
         clone: {

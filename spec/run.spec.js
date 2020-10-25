@@ -1,4 +1,4 @@
-import { pluginize, SyncHook } from '../src/index.js';
+import { pluginize } from '../src/index.js';
 import { errorMode } from '../src/helpers/throwError.js';
 
 errorMode('development');
