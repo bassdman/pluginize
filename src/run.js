@@ -7,7 +7,7 @@ function runFactory(factoryConfig) {
 
         ctx.log('- Add plugin "' + conf.name + '"');
 
-        conf = ctx.hooks.preInitPlugin.call(conf, ctx) || conf;
+        conf = ctx.hooks.onPreInitPlugin.call(conf, ctx) || conf;
 
         throwErrorIf(conf == null, `Error: Plugin is null`, 'conf.isNull');
         throwErrorIf(!conf.name, `Plugin ${JSON.stringify(conf)} has no name. Please define a name by adding an attribute name:"pluginname" to your plugin.`, 'plugin.noName');
@@ -53,9 +53,9 @@ function runFactory(factoryConfig) {
             _context: true,
             addPlugin: addPluginSync,
             hooks: {
-                return: new SyncHook(['context']),
-                preInitPlugin: new SyncWaterfallHook(['config', 'context']),
-                pluginsInitialized: new SyncHook(['context']),
+                onReturn: new SyncHook(['context']),
+                onPreInitPlugin: new SyncWaterfallHook(['config', 'context']),
+                onPluginsInitialized: new SyncHook(['context']),
                 initPlugin: new SyncHook(['plugin', 'context']),
             },
             log() {
@@ -70,9 +70,9 @@ function runFactory(factoryConfig) {
         }
 
 
-        throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.preInit returns null but should return the modified config.', 'factoryConfig.preInit.isNull')
-        throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.preInit returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.preInit.wrongType')
-        throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.preInit returns an Array but should return an object.', 'factoryConfig.preInit.wrongTypeArray')
+        throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.onPreInit returns null but should return the modified config.', 'factoryConfig.preInit.isNull')
+        throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.onPreInit returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.preInit.wrongType')
+        throwErrorIf(Array.isArray(config), 'pluginize(config,factoryConfig): factoryConfig.onPreInit returns an Array but should return an object.', 'factoryConfig.preInit.wrongTypeArray')
 
 
         if (config.debug)
@@ -91,17 +91,17 @@ function runFactory(factoryConfig) {
 
 
         for (let _plugin of ctx.plugins) {
-            throwErrorIf(_plugin == null, "error in Pluginize(config): hook preInitPlugin - a listener returns null but should  return an object (the modified config)", "config.preInit.returnNull");
-            throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook preInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.preInit.wrongType");
+            throwErrorIf(_plugin == null, "error in Pluginize(config): hook onPreInitPlugin - a listener returns null but should  return an object (the modified config)", "config.preInit.returnNull");
+            throwErrorIf(Array.isArray(_plugin) || typeof _plugin !== 'object', "error in Pluginize(config): hook onPreInitPlugin - a listener should return an object (the modified config) but returns a " + typeof _plugin, "config.preInit.wrongType");
 
             ctx.log('- call hook "initPlugin" of plugin ' + _plugin.name);
             ctx.hooks.initPlugin.call(_plugin, ctx);
         }
 
-        ctx.log('- call hook "pluginsInitialized"');
-        ctx.hooks.pluginsInitialized.call(ctx);
+        ctx.log('- call hook "onPluginsInitialized"');
+        ctx.hooks.onPluginsInitialized.call(ctx);
 
-        ctx.hooks.return.call(ctx);
+        ctx.hooks.onReturn.call(ctx);
 
         if (ctx.return) {
             return ctx[ctx.return];

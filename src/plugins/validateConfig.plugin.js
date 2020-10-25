@@ -15,7 +15,7 @@ function ValidateConfigPlugin() {
                 if (config.disableKeyCheck)
                     disableKeyCheck = config.disableKeyCheck;
             },
-            pluginsInitialized(ctx) {
+            onPluginsInitialized(ctx) {
                 if (disableKeyCheck)
                     return;
 

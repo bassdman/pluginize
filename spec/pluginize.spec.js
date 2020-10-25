@@ -49,7 +49,7 @@ describe("pluginize(config)", function() {
         expect(result.hw2).toBe('hello world2');
     });
 
-    it("should add config.test in the configattributes when config.preInit added this", function() {
+    it("should add config.test in the configattributes when config.onPreInit added this", function() {
         const result = pluginize({
             onPreInit: function(config) {
                 config.test = config._test;

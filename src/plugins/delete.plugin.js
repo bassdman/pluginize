@@ -9,7 +9,7 @@ function DeletePlugin() {
                     toDelete.push(...config.delete);
                 }
             },
-            return (ctx) {
+            onReturn(ctx) {
                 for (let key of toDelete) {
 
                     delete ctx[key];

@@ -16,7 +16,7 @@ function ClonePlugin() {
                     }
                 }
             },
-            return (ctx) {
+            onReturn(ctx) {
                 let newKey, oldKey, value;
                 for (oldKey of Object.keys(cloned)) {
                     newKey = cloned[oldKey];

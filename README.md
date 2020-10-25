@@ -58,7 +58,7 @@ and you will have
             initPlugin(config){
                 //do sth when your library / the plugins are initialized
             },
-            pluginsInitialized(){
+            onPluginsInitialized(){
                 // do sth when all plugins are initialized
             }
         },
@@ -160,9 +160,9 @@ both results will look like this
   _context: true,
   addPlugin: [Function],
   hooks: {
-    return: SyncHook {  },
-    preInitPlugin: SyncWaterfallHook {},
-    pluginsInitialized: SyncHook {  },
+    onReturn: SyncHook {  },
+    onPreInitPlugin: SyncWaterfallHook {},
+    onPluginsInitialized: SyncHook {  },
     initPlugin: SyncHook { }
   },
   log: [Function], //you can log sth with result.log(xxx)

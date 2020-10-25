@@ -14,7 +14,7 @@ function RenamePlugin() {
                     }
                 }
             },
-            return (ctx) {
+            onReturn(ctx) {
                 let newKey, oldKey, value;
                 for (oldKey of Object.keys(renamed)) {
                     newKey = renamed[oldKey];

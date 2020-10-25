@@ -70,10 +70,10 @@ describe("pluginize.runPromise(config):", function() {
             }
         })).toBeResolved();
     });
-    it("should have a hook called 'pluginsInitialized'", async function() {
+    it("should have a hook called 'onPluginsInitialized'", async function() {
         await expectAsync(pluginize().runPromise({
             hooks: {
-                pluginsInitialized: function() {}
+                onPluginsInitialized: function() {}
             }
         })).toBeResolved();
     });
@@ -122,20 +122,20 @@ describe("pluginize.runPromise(config):", function() {
     });
 
 
-    describe('async config.hooks.preInitPlugin', function() {
-        it("should have a hook 'preInitPlugin'", async function() {
+    describe('async config.hooks.onPreInitPlugin', function() {
+        it("should have a hook 'onPreInitPlugin'", async function() {
             const result = await pluginize().runPromise();
 
-            expect(result.hooks.preInitPlugin).toBeDefined();
+            expect(result.hooks.onPreInitPlugin).toBeDefined();
         });
 
         it("should be called before 'initPlugin'", async function() {
             const order = [];
             await pluginize().runPromise({
                 hooks: {
-                    preInitPlugin() {
-                        if (!order.includes('preInitPlugin'))
-                            order.push('preInitPlugin');
+                    onPreInitPlugin() {
+                        if (!order.includes('onPreInitPlugin'))
+                            order.push('onPreInitPlugin');
                     },
                     initPlugin() {
                         if (!order.includes('initPlugin'))
@@ -144,14 +144,14 @@ describe("pluginize.runPromise(config):", function() {
                 }
             });
 
-            expect(order).toEqual(['preInitPlugin', 'initPlugin']);
+            expect(order).toEqual(['onPreInitPlugin', 'initPlugin']);
         });
 
         it("should change the config attribute _test to 'test' when it is changed", async function() {
             const result = await pluginize().runPromise({
                 _test: true,
                 hooks: {
-                    preInitPlugin(config) {
+                    onPreInitPlugin(config) {
                         config.test = config._test;
                         delete config._test;
                     },
@@ -177,7 +177,7 @@ describe("pluginize.runPromise(config):", function() {
 
                 }],
                 hooks: {
-                    preInitPlugin(config) {
+                    onPreInitPlugin(config) {
                         if (!config.name)
                             config.name = 'default';
                     },
