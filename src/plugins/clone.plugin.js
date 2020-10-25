@@ -3,6 +3,7 @@ import cloneDeep from 'lodash.clonedeep';
 function ClonePlugin() {
     const cloned = {};
     return {
+        _pluginizeInternal: true,
         allowKeys: ['clone'],
         name: 'ClonePlugin',
         onInitPlugin(config, ctx) {

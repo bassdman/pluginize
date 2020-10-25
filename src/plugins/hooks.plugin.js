@@ -1,7 +1,6 @@
-import { throwErrorIf } from '../helpers/throwError.js';
-
 function InitHooksPlugin(ctx) {
     return {
+        _pluginizeInternal: true,
         name: 'InitHooksPlugin',
         allowKeys: ['onReturn', 'onPreInitPlugin', 'onPluginsInitialized'],
 

@@ -1,6 +1,7 @@
 function ReturnPlugin() {
 
     return {
+        _pluginizeInternal: true,
         allowKeys: ['return'],
         name: 'ReturnPlugin',
         onInitPlugin(config, ctx) {

@@ -1,6 +1,7 @@
 function DeletePlugin() {
     const toDelete = [];
     return {
+        _pluginizeInternal: true,
         allowKeys: ['delete'],
         name: 'DeletePlugin',
         onReturn(ctx) {

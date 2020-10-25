@@ -3,6 +3,7 @@ export default function() {
     let libraryType = "object";
 
     return {
+        _pluginizeInternal: true,
         onInit(config) {
 
         },

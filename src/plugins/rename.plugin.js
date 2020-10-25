@@ -1,6 +1,7 @@
 function RenamePlugin() {
     const renamed = {};
     return {
+        _pluginizeInternal: true,
         allowKeys: ['rename'],
         name: 'RenamePlugin',
         onReturn(ctx) {
