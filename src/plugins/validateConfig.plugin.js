@@ -2,7 +2,7 @@ import { throwError } from '../helpers/throwError.js';
 
 
 function ValidateConfigPlugin() {
-    const usedKeys = ['name', 'hooks', 'onInit', 'onPreInit', 'allowKeys', 'disableKeyCheck', 'plugins', 'debug', 'onInitPlugin'];
+    const usedKeys = ['name', 'hooks', 'onInit', 'onPreInit', 'allowKeys', 'disableKeyCheck', 'plugins', 'debug', 'onInitPlugin', 'onPreInitPlugin'];
     let disableKeyCheck = false;
 
     return {

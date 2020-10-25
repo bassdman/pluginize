@@ -7,7 +7,7 @@ function runFactory(factoryConfig) {
 
         ctx.log('- Add plugin "' + conf.name + '"');
 
-        conf = ctx.hooks.onPreInitPlugin.call(conf, ctx) || conf;
+        conf = ctx.onPreInitPlugin.call(conf, ctx) || conf;
 
         throwErrorIf(conf == null, `Error: Plugin is null`, 'conf.isNull');
         throwErrorIf(!conf.name, `Plugin ${JSON.stringify(conf)} has no name. Please define a name by adding an attribute name:"pluginname" to your plugin.`, 'plugin.noName');
@@ -53,9 +53,10 @@ function runFactory(factoryConfig) {
             _context: true,
             addPlugin: addPluginSync,
             onInitPlugin: new SyncHook(['plugin', 'context']),
+            onPreInitPlugin: new SyncWaterfallHook(['config', 'context']),
             hooks: {
                 onReturn: new SyncHook(['context']),
-                onPreInitPlugin: new SyncWaterfallHook(['config', 'context']),
+
                 onPluginsInitialized: new SyncHook(['context']),
             },
             log() {

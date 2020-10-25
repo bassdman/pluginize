@@ -120,11 +120,11 @@ describe("pluginize.runPromise(config):", function() {
     });
 
 
-    describe('async config.hooks.onPreInitPlugin', function() {
+    describe('async config.onPreInitPlugin', function() {
         it("should have a hook 'onPreInitPlugin'", async function() {
             const result = await pluginize().runPromise();
 
-            expect(result.hooks.onPreInitPlugin).toBeDefined();
+            expect(result.onPreInitPlugin).toBeDefined();
         });
 
         it("should be called before 'onInitPlugin'", async function() {
@@ -134,13 +134,11 @@ describe("pluginize.runPromise(config):", function() {
                     if (!order.includes('onInitPlugin'))
                         order.push('onInitPlugin');
                 },
-                hooks: {
-                    onPreInitPlugin() {
-                        if (!order.includes('onPreInitPlugin'))
-                            order.push('onPreInitPlugin');
-                    },
+                onPreInitPlugin() {
+                    if (!order.includes('onPreInitPlugin'))
+                        order.push('onPreInitPlugin');
+                },
 
-                }
             });
 
             expect(order).toEqual(['onPreInitPlugin', 'onInitPlugin']);
@@ -149,11 +147,9 @@ describe("pluginize.runPromise(config):", function() {
         it("should change the config attribute _test to 'test' when it is changed", async function() {
             const result = await pluginize().runPromise({
                 _test: true,
-                hooks: {
-                    onPreInitPlugin(config) {
-                        config.test = config._test;
-                        delete config._test;
-                    },
+                onPreInitPlugin(config) {
+                    config.test = config._test;
+                    delete config._test;
                 },
                 allowKeys: ['test']
             });
@@ -175,11 +171,9 @@ describe("pluginize.runPromise(config):", function() {
                 plugins: [{
 
                 }],
-                hooks: {
-                    onPreInitPlugin(config) {
-                        if (!config.name)
-                            config.name = 'default';
-                    },
+                onPreInitPlugin(config) {
+                    if (!config.name)
+                        config.name = 'default';
                 },
             });
 

@@ -7,7 +7,7 @@ function runPromiseFactory(factoryConfig) {
 
         ctx.log('- Add plugin "' + conf.name + '"');
 
-        conf = await ctx.hooks.onPreInitPlugin.promise(conf, ctx) || conf;
+        conf = await ctx.onPreInitPlugin.promise(conf, ctx) || conf;
 
         throwErrorIf(!conf.name, `Plugin ${JSON.stringify(conf)} has no name. Please define a name by adding an attribute name:"pluginname" to your plugin.`, 'plugin.noName');
         throwErrorIf(typeof conf === 'function', `Plugin ${conf.name} is a function, but should be a configuration object. Did you forget calling it? (eg: PluginName())`, 'plugin.isFunction');
@@ -48,9 +48,9 @@ function runPromiseFactory(factoryConfig) {
             _context: true,
             addPlugin: addPluginAsync,
             onInitPlugin: new AsyncHook(['plugin', 'context']),
+            onPreInitPlugin: new AsyncWaterfallHook(['config', 'context']),
             hooks: {
                 onReturn: new AsyncHook(['context']),
-                onPreInitPlugin: new AsyncWaterfallHook(['config', 'context']),
                 onPluginsInitialized: new AsyncHook(['context']),
             },
             log() {
