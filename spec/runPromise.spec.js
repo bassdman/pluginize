@@ -46,23 +46,6 @@ describe("pluginize.runPromise(config):", function() {
         await expectAsync(pluginize().runPromise({ onInit: function() { return 5; } })).toBeResolved();
     });
 
-
-
-
-
-    it("should be valid to add a config attribute called 'hooks' = {}", async function() {
-        await expectAsync(pluginize().runPromise({ hooks: {} })).toBeResolved();
-    });
-    it("should throw an error if config attribute 'hooks' is not an object", async function() {
-        await expectAsync(pluginize().runPromise({ hooks: [] })).toBeRejected('config.hooks.wrongtype');
-    });
-    it("should throw an error if hooks named 'xyz' does not exist", async function() {
-        await expectAsync(pluginize().runPromise({
-            hooks: {
-                xyz: true
-            }
-        })).toBeRejected('config.hooks.notDefined');
-    });
     it("should have a hook called 'onInitPlugin'", async function() {
         await expectAsync(pluginize().runPromise({
             onInitPlugin: function() {}
@@ -70,27 +53,7 @@ describe("pluginize.runPromise(config):", function() {
     });
     it("should have a hook called 'onPluginsInitialized'", async function() {
         await expectAsync(pluginize().runPromise({
-            hooks: {
-                onPluginsInitialized: function() {}
-            }
-        })).toBeResolved();
-    });
-    it("should be valid to add a config attribute called 'addHooks' = {}", async function() {
-        await expectAsync(pluginize().runPromise({ addHooks: {} })).toBeResolved();
-    });
-    it("should throw an error if config attribute 'addHooks' is not an object", async function() {
-        await expectAsync(pluginize().runPromise({ addHooks: [] }))
-            .toBeRejected('config.addHooks.wrongtype');
-    });
-    it("should not throw an error with addHook:{xyz} and hook:{xyz}", async function() {
-        await expectAsync(pluginize().runPromise({
-            debug: true,
-            addHooks: {
-                xyz: new SyncHook()
-            },
-            hooks: {
-                xyz: function() {}
-            }
+            onPluginsInitialized: function() {}
         })).toBeResolved();
     });
     it("should not throw an error if invalid configattribute xyabc is added and config.disableKeyCheck == true", async function() {

@@ -50,9 +50,7 @@ function runPromiseFactory(factoryConfig) {
             onInitPlugin: new AsyncHook(['plugin', 'context']),
             onPreInitPlugin: new AsyncWaterfallHook(['config', 'context']),
             onReturn: new AsyncHook(['context']),
-            hooks: {
-                onPluginsInitialized: new AsyncHook(['context']),
-            },
+            onPluginsInitialized: new AsyncHook(['context']),
             log() {
                 if (config.debug)
                     console.log(...arguments);
@@ -94,7 +92,7 @@ function runPromiseFactory(factoryConfig) {
         }
 
         ctx.log('- call hook "onPluginsInitialized"');
-        await ctx.hooks.onPluginsInitialized.promise(ctx);
+        await ctx.onPluginsInitialized.promise(ctx);
 
         await ctx.onReturn.promise(ctx);
 

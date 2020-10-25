@@ -55,10 +55,7 @@ function runFactory(factoryConfig) {
             onInitPlugin: new SyncHook(['plugin', 'context']),
             onPreInitPlugin: new SyncWaterfallHook(['config', 'context']),
             onReturn: new SyncHook(['context']),
-            hooks: {
-
-                onPluginsInitialized: new SyncHook(['context']),
-            },
+            onPluginsInitialized: new SyncHook(['context']),
             log() {
                 if (config.debug)
                     console.log(...arguments);
@@ -100,7 +97,7 @@ function runFactory(factoryConfig) {
         }
 
         ctx.log('- call hook "onPluginsInitialized"');
-        ctx.hooks.onPluginsInitialized.call(ctx);
+        ctx.onPluginsInitialized.call(ctx);
 
         ctx.onReturn.call(ctx);
 

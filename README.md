@@ -81,10 +81,8 @@ and you will have
             // removes the keys of the output
         },
         return: 'akey', //if you want a specific key to be returned
-        hooks:{
-            return(context){
-                //when you want sth completely different, for example a function, you can do it here :)
-            }
+        onReturn(context){
+            //when you want sth completely different, for example a function, you can do it here :)
         }
     });
 
@@ -95,22 +93,21 @@ and you will have
 ``` javascript
     //default: a library returns an object (the context) - but you can modify it
     const yourlibrary = pluginize({
-        addHooks: {
-            after5Seconds: new SyncHook() // don't worry about the hooks - your will learn more about them later
-        },
         onInit(){
             setTimeout(function(config,ctx){
-                ctx.hooks.after5Seconds.call('5 seconds later');
-            }, 5000)
+                ctx.after5Seconds.call('5 seconds later');
+            }, 5000);
+
+            return {
+                after5Seconds: new SyncHook() // don't worry about the hooks - your will learn more about them later
+            }
         }
     });
 
     //it can be used like this
     yourLibrary.runPromise({
-        hooks: {
-            after5Seconds(message){
-                //do sth after 5 seconds
-            }
+        after5Seconds(message){
+            //do sth after 5 seconds
         }
     })
 
@@ -163,7 +160,6 @@ both results will look like this
     onInitPlugin: SyncHook { }
     log: [Function], //you can log sth with result.log(xxx)
     disableKeyCheck: [Function], 
-    addHooks: [Function], // you can add hooks with result.addHooks
     on: [Function] // you can listen to hooks with result.on()
 }
 ```

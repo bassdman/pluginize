@@ -65,25 +65,6 @@ describe("pluginize().run(config)", function() {
             });
         }).not.toThrow();
     });
-    it("should be valid to add a config attribute called 'hooks' = {}", function() {
-        expect(() => {
-            return pluginize().run({ hooks: {} });
-        }).not.toThrow();
-    });
-    it("should throw an error if config attribute 'hooks' is not an object", function() {
-        expect(() => {
-            return pluginize().run({ hooks: [] });
-        }).toThrow('config.hooks.wrongtype');
-    });
-    it("should throw an error if hooks named 'xyz' does not exist", function() {
-        expect(() => {
-            return pluginize().run({
-                hooks: {
-                    xyz: true
-                }
-            });
-        }).toThrow('config.hooks.notDefined');
-    });
     it("should have a hook called 'onInitPlugin'", function() {
         expect(() => {
             return pluginize().run({
@@ -94,32 +75,7 @@ describe("pluginize().run(config)", function() {
     it("should have a hook called 'onPluginsInitialized'", function() {
         expect(() => {
             return pluginize().run({
-                hooks: {
-                    onPluginsInitialized: function() {}
-                }
-            });
-        }).not.toThrow();
-    });
-    it("should be valid to add a config attribute called 'addHooks' = {}", function() {
-        expect(() => {
-            return pluginize().run({ addHooks: {} });
-        }).not.toThrow();
-    });
-    it("should throw an error if config attribute 'addHooks' is not an object", function() {
-        expect(() => {
-            return pluginize().run({ addHooks: [] });
-        }).toThrow('config.addHooks.wrongtype');
-    });
-    it("should not throw an error with addHook:{xyz} and hook:{xyz}", function() {
-        expect(() => {
-            return pluginize().run({
-                debug: true,
-                addHooks: {
-                    xyz: new SyncHook()
-                },
-                hooks: {
-                    xyz: function() {}
-                }
+                onPluginsInitialized: function() {}
             });
         }).not.toThrow();
     });
