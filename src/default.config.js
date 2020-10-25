@@ -29,16 +29,16 @@ const DefaultConfig = {
         new InitHooksPlugin(),
 
         /*
+            Adds pluginize.onReturn to the interface
+        */
+        new ReturnPlugin(),
+
+        /*
             Enables adding {
                 clone: { foo: 'bar' },
             } to the config.
         */
         new ClonePlugin(),
-
-        /*
-            Adds pluginize.return to the interface
-        */
-        new ReturnPlugin(),
 
         /*
             Enables adding {

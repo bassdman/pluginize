@@ -3,14 +3,11 @@ function DeletePlugin() {
     return {
         allowKeys: ['delete'],
         name: 'DeletePlugin',
-        hooks: {
+        onReturn(ctx) {
+            for (let key of toDelete) {
 
-            onReturn(ctx) {
-                for (let key of toDelete) {
-
-                    delete ctx[key];
-                }
-            },
+                delete ctx[key];
+            }
         },
         onInitPlugin(config, ctx) {
             if (config.delete) {

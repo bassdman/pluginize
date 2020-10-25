@@ -49,8 +49,6 @@ describe("ClonePlugin", function() {
         });
         result.source.x = 13;
 
-        console.log(result)
-
         expect(result.clone.x).toBe(5);
     });
 });

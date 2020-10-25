@@ -6,6 +6,8 @@ class Hook {
     tap(name, listener) {
         if (name == undefined)
             throw new Error('Hook.on(): should be on(name:string, listener:function) but name is undefined');
+        if (this._listeners[name])
+            throw new Error('Hook.on(name:string, listener:function): a listener with name "' + name + '" already exists - choose another name.');
         if (listener == undefined)
             throw new Error('Hook.on(): should be on(name:string, listener:function) but listener is undefined');
 

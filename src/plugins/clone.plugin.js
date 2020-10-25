@@ -15,16 +15,13 @@ function ClonePlugin() {
                 }
             }
         },
-        hooks: {
+        onReturn(ctx) {
+            let newKey, oldKey, value;
+            for (oldKey of Object.keys(cloned)) {
+                newKey = cloned[oldKey];
 
-            onReturn(ctx) {
-                let newKey, oldKey, value;
-                for (oldKey of Object.keys(cloned)) {
-                    newKey = cloned[oldKey];
-
-                    ctx[newKey] = cloneDeep(ctx[oldKey]);
-                }
-            },
+                ctx[newKey] = cloneDeep(ctx[oldKey]);
+            }
         },
     }
 }

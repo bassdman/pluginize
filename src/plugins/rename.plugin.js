@@ -3,16 +3,14 @@ function RenamePlugin() {
     return {
         allowKeys: ['rename'],
         name: 'RenamePlugin',
-        hooks: {
-            onReturn(ctx) {
-                let newKey, oldKey, value;
-                for (oldKey of Object.keys(renamed)) {
-                    newKey = renamed[oldKey];
+        onReturn(ctx) {
+            let newKey, oldKey, value;
+            for (oldKey of Object.keys(renamed)) {
+                newKey = renamed[oldKey];
 
-                    ctx[newKey] = ctx[oldKey];
-                    delete ctx[oldKey];
-                }
-            },
+                ctx[newKey] = ctx[oldKey];
+                delete ctx[oldKey];
+            }
         },
         onInitPlugin(config, ctx) {
             if (config.rename) {
