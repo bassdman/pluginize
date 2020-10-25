@@ -63,10 +63,10 @@ describe("pluginize.runPromise(config):", function() {
             }
         })).toBeRejected('config.hooks.notDefined');
     });
-    it("should have a hook called 'initPlugin'", async function() {
+    it("should have a hook called 'onInitPlugin'", async function() {
         await expectAsync(pluginize().runPromise({
             hooks: {
-                initPlugin: function() {}
+                onInitPlugin: function() {}
             }
         })).toBeResolved();
     });
@@ -129,7 +129,7 @@ describe("pluginize.runPromise(config):", function() {
             expect(result.hooks.onPreInitPlugin).toBeDefined();
         });
 
-        it("should be called before 'initPlugin'", async function() {
+        it("should be called before 'onInitPlugin'", async function() {
             const order = [];
             await pluginize().runPromise({
                 hooks: {
@@ -137,14 +137,14 @@ describe("pluginize.runPromise(config):", function() {
                         if (!order.includes('onPreInitPlugin'))
                             order.push('onPreInitPlugin');
                     },
-                    initPlugin() {
-                        if (!order.includes('initPlugin'))
-                            order.push('initPlugin');
+                    onInitPlugin() {
+                        if (!order.includes('onInitPlugin'))
+                            order.push('onInitPlugin');
                     }
                 }
             });
 
-            expect(order).toEqual(['onPreInitPlugin', 'initPlugin']);
+            expect(order).toEqual(['onPreInitPlugin', 'onInitPlugin']);
         });
 
         it("should change the config attribute _test to 'test' when it is changed", async function() {

@@ -8,7 +8,7 @@ function ValidateConfigPlugin() {
     return {
         name: 'ValidateConfigPlugin',
         hooks: {
-            initPlugin(config, ctx) {
+            onInitPlugin(config, ctx) {
                 if (config.allowKeys)
                     usedKeys.push(...config.allowKeys);
 

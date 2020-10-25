@@ -4,7 +4,7 @@ function ReturnPlugin() {
         allowKeys: ['return'],
         name: 'ReturnPlugin',
         hooks: {
-            initPlugin(config, ctx) {
+            onInitPlugin(config, ctx) {
                 if (config.return) {
                     ctx.return = config.return;
                 }

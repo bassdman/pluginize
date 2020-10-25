@@ -5,7 +5,7 @@ function InitHooksPlugin(ctx) {
         name: 'InitHooksPlugin',
         allowKeys: ['addHooks', 'hooks'],
         hooks: {
-            initPlugin: function(config, ctx) {
+            onInitPlugin: function(config, ctx) {
                 if (config.addHooks) {
                     throwErrorIf(Array.isArray(config.addHooks) || typeof config.addHooks != 'object', `Error in plugin "${config.name}": config.addHooks must be an object but is a ${typeof config.addHooks}`, 'config.addHooks.wrongtype')
                     for (let hookname of Object.keys(config.addHooks)) {

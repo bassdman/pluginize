@@ -84,11 +84,11 @@ describe("pluginize().run(config)", function() {
             });
         }).toThrow('config.hooks.notDefined');
     });
-    it("should have a hook called 'initPlugin'", function() {
+    it("should have a hook called 'onInitPlugin'", function() {
         expect(() => {
             return pluginize().run({
                 hooks: {
-                    initPlugin: function() {}
+                    onInitPlugin: function() {}
                 }
             });
         }).not.toThrow();
@@ -144,7 +144,7 @@ describe("pluginize().run(config)", function() {
             expect(result.hooks.onPreInitPlugin).toBeDefined();
         });
 
-        it("should be called before 'initPlugin'", function() {
+        it("should be called before 'onInitPlugin'", function() {
             const order = [];
             pluginize().run({
                 hooks: {
@@ -152,14 +152,14 @@ describe("pluginize().run(config)", function() {
                         if (!order.includes('onPreInitPlugin'))
                             order.push('onPreInitPlugin');
                     },
-                    initPlugin() {
-                        if (!order.includes('initPlugin'))
-                            order.push('initPlugin');
+                    onInitPlugin() {
+                        if (!order.includes('onInitPlugin'))
+                            order.push('onInitPlugin');
                     }
                 }
             });
 
-            expect(order).toEqual(['onPreInitPlugin', 'initPlugin']);
+            expect(order).toEqual(['onPreInitPlugin', 'onInitPlugin']);
         });
 
         it("should change the config attribute _test to 'test' when it is changed", function() {

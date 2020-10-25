@@ -6,7 +6,7 @@ function ClonePlugin() {
         allowKeys: ['clone'],
         name: 'ClonePlugin',
         hooks: {
-            initPlugin(config, ctx) {
+            onInitPlugin(config, ctx) {
                 if (config.clone) {
                     let newKey, oldKey;
                     for (oldKey of Object.keys(config.clone)) {

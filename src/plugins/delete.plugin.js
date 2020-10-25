@@ -4,7 +4,7 @@ function DeletePlugin() {
         allowKeys: ['delete'],
         name: 'DeletePlugin',
         hooks: {
-            initPlugin(config, ctx) {
+            onInitPlugin(config, ctx) {
                 if (config.delete) {
                     toDelete.push(...config.delete);
                 }

@@ -4,7 +4,7 @@ function RenamePlugin() {
         allowKeys: ['rename'],
         name: 'RenamePlugin',
         hooks: {
-            initPlugin(config, ctx) {
+            onInitPlugin(config, ctx) {
                 if (config.rename) {
                     let newKey, oldKey;
                     for (oldKey of Object.keys(config.rename)) {

@@ -55,7 +55,7 @@ and you will have
 ``` javascript
     yourLibrary.runPromise({
         hooks: {
-            initPlugin(config){
+            onInitPlugin(config){
                 //do sth when your library / the plugins are initialized
             },
             onPluginsInitialized(){
@@ -163,7 +163,7 @@ both results will look like this
     onReturn: SyncHook {  },
     onPreInitPlugin: SyncWaterfallHook {},
     onPluginsInitialized: SyncHook {  },
-    initPlugin: SyncHook { }
+    onInitPlugin: SyncHook { }
   },
   log: [Function], //you can log sth with result.log(xxx)
   disableKeyCheck: [Function], 
