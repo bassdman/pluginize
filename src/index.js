@@ -37,5 +37,17 @@ function pluginizeFactory(_factoryConfig = {}, staticAttributes = {}) {
 
 }
 
-const pluginize = pluginizeFactory({ level: 0 });
-export { pluginize, SyncHook, AsyncHook, SyncWaterfallHook, AsyncWaterfallHook, SyncBreakableHook, AsyncBreakableHook }
+const pluginize = pluginizeFactory({
+    level: 0,
+});
+
+Object.assign(pluginize, {
+    SyncHook,
+    AsyncHook,
+    SyncWaterfallHook,
+    AsyncWaterfallHook,
+    SyncBreakableHook,
+    AsyncBreakableHook
+});
+
+export { pluginize, }

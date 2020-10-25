@@ -91,4 +91,8 @@ describe("pluginize(config)", function() {
         expect(lib1.factoryConfig.configs.length).toBe(3);
         expect(lib2.factoryConfig.configs.length).toBe(4);
     });
+
+    it("should have pluginize.SyncHook defined", function() {
+        expect(pluginize.SyncHook).toBeDefined();
+    });
 });
