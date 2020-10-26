@@ -1,7 +1,7 @@
 {
     "name": "pluginize",
-    "version": "0.1.0",
-    "description": "Visualize  and modify all kinds of data",
+    "version": "0.1.2",
+    "description": "The infrastructure package for creating your library / project.",
     "main": "dist/pluginize.js",
     "scripts": {
         "test": "karma start",
