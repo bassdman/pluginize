@@ -366,34 +366,34 @@ There are a few ways of changing the content:
 
 Therefore we will use an advanced version of the MathLibraryPlugin - the CalculationPlugin. It sums up the numbers entered on config-attribute "numbers" and writes it into the context-attribute "sum".
 ```javascript
-    const CalculationPlugin = {
-            allowKeys: ['numbers'],
-            name: 'CalculationPlugin',
-            onInit(config) {
-                return {
-                    //this will sum up numbers. example: [1,2,3,4] => 10
-                    sum: config.numbers.reduce((pv, cv) => pv + cv, 0)
-                }
-            }
-        };
+const CalculationPlugin = {
+    allowKeys: ['numbers'],
+    name: 'CalculationPlugin',
+    onInit(config) {
+        return {
+            //this will sum up numbers. example: [1,2,3,4] => 10
+            sum: config.numbers.reduce((pv, cv) => pv + cv, 0)
+        }
+    }
+};
 ```
 
 ### Default return value
 When we just use this plugin, pluginize().run() will return the whole context
 ```javascript
-    const myLibrary = pluginize({
-        numbers: [1,2,3,4,5,6],
-        plugins: [CalculationPlugin]
-    })
-    const result = myLibrary.run();
-    /*
-        result: {
-            // the whole context
-            ...
-                sum: 21,
-            ...
-        }
-    */
+const myLibrary = pluginize({
+    numbers: [1,2,3,4,5,6],
+    plugins: [CalculationPlugin]
+})
+const result = myLibrary.run();
+/*
+    result: {
+        // the whole context
+        ...
+            sum: 21,
+        ...
+    }
+*/
 ```
 
 ### Return Key
@@ -473,3 +473,54 @@ To delete a key from the context.
     */
 ```
 ## Use hooks
+Hooks help us to add code in a specific situation.
+By convention all hooks should start with "on" - except there is a good reason to do it different.
+
+We already got in contact with hooks, do you remember?
+
+```javascript
+const CalculationPlugin = {
+    allowKeys: ['numbers'],
+    name: 'CalculationPlugin',
+    // this is one hook
+    onInit(config) {}
+};
+```
+There are some more Hooks already defined by pluginize - but you can also add some. These hooks already exist by default
+| Hook | Called | When to use | 
+| ---  |  ---   |   ---       |
+| onPreInit | before config is analyzed| When your inputconfig does not match the criteria, you can modify it here
+| onInit  |  onInit, after onPreInit   |   To setup hooks, Context,...       |
+|onPreInitPlugin| before a plugin is executed | When your pluginconfig does not match the criteria, you can modify it here|
+|onInitPlugin|when a plugin is executed | If you have logic depending on the configuration of the plugins, add it here
+|onPluginsInitialized|When all plugins are executed| do something after all Plugins finished |
+|onReturn|before returning the result|to modify the returned result|
+
+[Details about the hooks you can read here.](#plugin-livecycle)
+
+Let's use this knowledge to create a small Feature-Toggle-Library.
+
+What it should be able to do:
+```javascript
+const result = featureToggleLib.run({
+    featurea: true,
+    featureb: false,
+    featurec: true
+    ...
+});
+result.isActive('featurea'); //true
+```
+
+Let's create a FeatureTogglePlugin
+```javascript
+const FeatureTogglePlugin = {
+    allowKeys: ['numbers'],
+    name: 'FeatureTogglePlugin',
+    // this is one hook
+    onPreInit(config, ctx) {
+        let data = config;
+    }
+};
+```
+
+# Plugin Livecycle

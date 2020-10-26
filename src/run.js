@@ -1,6 +1,7 @@
 import { DefaultConfig as DefaultPlugin } from './default.config.js';
 import { SyncHook, SyncWaterfallHook } from './helpers/hooks.js';
 import { throwErrorIf, errorMode } from './helpers/throwError.js';
+import { foreachPlugin } from './helpers/foreachPlugin.js';
 
 function runFactory(factoryConfig) {
     function addPluginSync(conf, ctx) {
@@ -63,8 +64,11 @@ function runFactory(factoryConfig) {
         };
 
         for (let parentConfig of factoryConfig.configs) {
-            if (parentConfig.onPreInit)
-                parentConfig.onPreInit(config, ctx);
+            foreachPlugin(parentConfig, _plugin => {
+                if (_plugin.onPreInit)
+                    _plugin.onPreInit(config, ctx);
+            })
+
         }
 
 
@@ -82,8 +86,8 @@ function runFactory(factoryConfig) {
         ctx.log('Starting Pluginize.')
         addPluginSync(DefaultPlugin, ctx);
 
-        for (let pluginTorunPromise of factoryConfig.configs)
-            addPluginSync(pluginTorunPromise, ctx);
+        for (let pluginTorun of factoryConfig.configs)
+            addPluginSync(pluginTorun, ctx);
 
         addPluginSync(config, ctx);
 

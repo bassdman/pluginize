@@ -1,6 +1,7 @@
 import { DefaultConfig as DefaultPlugin } from './default.config.js';
 import { AsyncHook, AsyncWaterfallHook } from './helpers/hooks.js';
 import { throwErrorIf, errorMode } from './helpers/throwError.js';
+import { foreachPluginAsync } from './helpers/foreachPlugin.js';
 
 function runPromiseFactory(factoryConfig) {
     async function addPluginAsync(conf, ctx) {
@@ -58,8 +59,10 @@ function runPromiseFactory(factoryConfig) {
         };
 
         for (let parentConfig of factoryConfig.configs) {
-            if (parentConfig.onPreInit)
-                parentConfig.onPreInit(config, ctx);
+            await foreachPluginAsync(parentConfig, async _plugin => {
+                if (_plugin.onPreInit)
+                    await _plugin.onPreInit(config, ctx);
+            })
         }
 
         throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.onPreInit returns null but should return the modified config.', 'factoryConfig.preInit.isNull')
