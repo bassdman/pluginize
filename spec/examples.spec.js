@@ -45,5 +45,79 @@ describe("examples", function() {
 
 
         expect(result).toBe(21);
+    });
+
+    it("06_hooks", function() {
+        const FeatureTogglePlugin = {
+            name: "FeatureTogglePlugin",
+            return: 'featureToggle',
+            allowKeys: ['data'],
+            onPreInit(config) {
+                return {
+                    data: config
+                }
+            },
+            onInit(config) {
+                return {
+                    featureToggle: {
+                        data: config.data,
+                        isActive: function(key) { return config.data[key] }
+                    }
+                }
+            }
+        };
+
+        const featureToggle = pluginize({
+            name: 'FeatureToggle',
+            debug: true,
+
+            plugins: [FeatureTogglePlugin]
+        });
+
+        const result = featureToggle({
+            featurea: true,
+            featureb: false,
+            featurec: true
+        }).run();
+
+
+
+        expect(result.isActive('featurea')).toBeTrue();
+    })
+
+    it("06_hooks-Async", async function() {
+        const FeatureTogglePlugin = {
+            name: "FeatureTogglePlugin",
+            return: 'featureToggle',
+            allowKeys: ['data'],
+            onPreInit(config) {
+                return {
+                    data: config
+                }
+            },
+            onInit(config) {
+                return {
+                    featureToggle: {
+                        data: config.data,
+                        isActive: function(key) { return config.data[key] }
+                    }
+                }
+            }
+        };
+
+        const featureToggle = pluginize({
+            name: 'FeatureToggle',
+            debug: true,
+
+            plugins: [FeatureTogglePlugin]
+        });
+
+        const result = await featureToggle({
+            featurea: true,
+            featureb: false,
+            featurec: true
+        }).runPromise();
+
+        expect(result.isActive('featurea')).toBeTrue();
     })
 })

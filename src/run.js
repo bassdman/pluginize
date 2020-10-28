@@ -47,14 +47,16 @@ function runFactory(factoryConfig) {
 
     return function run(config = {}) {
         config = Object.assign(config, factoryConfig.configs[factoryConfig.configs.length - 1] || {});
+        if (factoryConfig.configs.length > 1)
+            factoryConfig.configs.pop();
 
         let ctx = {
             plugins: [],
-            config,
             _context: true,
             addPlugin: addPluginSync,
             onInitPlugin: new SyncHook(['plugin', 'context']),
             onPreInitPlugin: new SyncWaterfallHook(['config', 'context']),
+            onPreInit: new SyncWaterfallHook(['config', 'context']),
             onReturn: new SyncHook(['context']),
             onPluginsInitialized: new SyncHook(['context']),
             log() {
@@ -65,12 +67,15 @@ function runFactory(factoryConfig) {
 
         for (let parentConfig of factoryConfig.configs) {
             foreachPlugin(parentConfig, _plugin => {
-                if (_plugin.onPreInit)
-                    _plugin.onPreInit(config, ctx);
+                if (_plugin.onPreInit) {
+                    ctx.onPreInit.tap(_plugin.name, _plugin.onPreInit);
+                }
             })
-
         }
 
+        config = ctx.onPreInit.call(config, ctx);
+
+        ctx.config = config;
 
         throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.onPreInit returns null but should return the modified config.', 'factoryConfig.preInit.isNull')
         throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.onPreInit returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.preInit.wrongType')

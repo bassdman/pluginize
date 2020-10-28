@@ -10,6 +10,7 @@ function runPromiseFactory(factoryConfig) {
 
         conf = await ctx.onPreInitPlugin.promise(conf, ctx) || conf;
 
+        throwErrorIf(conf == null, `Error: Plugin is null`, 'conf.isNull');
         throwErrorIf(!conf.name, `Plugin ${JSON.stringify(conf)} has no name. Please define a name by adding an attribute name:"pluginname" to your plugin.`, 'plugin.noName');
         throwErrorIf(typeof conf === 'function', `Plugin ${conf.name} is a function, but should be a configuration object. Did you forget calling it? (eg: PluginName())`, 'plugin.isFunction');
         throwErrorIf(typeof conf !== 'object' || Array.isArray(conf), `Plugin ${conf.name} should be a configuration of type object, but is typeof ${typeof conf}.`, 'plugin.wrongType');
@@ -42,14 +43,16 @@ function runPromiseFactory(factoryConfig) {
 
     return async function runPromise(config = {}) {
         config = Object.assign(config, factoryConfig.configs[factoryConfig.configs.length - 1] || {});
+        if (factoryConfig.configs.length > 1)
+            factoryConfig.configs.pop();
 
         let ctx = {
             plugins: [],
-            config,
             _context: true,
             addPlugin: addPluginAsync,
             onInitPlugin: new AsyncHook(['plugin', 'context']),
             onPreInitPlugin: new AsyncWaterfallHook(['config', 'context']),
+            onPreInit: new AsyncWaterfallHook(['config', 'context']),
             onReturn: new AsyncHook(['context']),
             onPluginsInitialized: new AsyncHook(['context']),
             log() {
@@ -61,9 +64,13 @@ function runPromiseFactory(factoryConfig) {
         for (let parentConfig of factoryConfig.configs) {
             await foreachPluginAsync(parentConfig, async _plugin => {
                 if (_plugin.onPreInit)
-                    await _plugin.onPreInit(config, ctx);
+                    ctx.onPreInit.tap(_plugin.name, _plugin.onPreInit);
             })
         }
+
+        config = await ctx.onPreInit.promise(config, ctx);
+
+        ctx.config = config;
 
         throwErrorIf(config == null, 'pluginize(config,factoryConfig): factoryConfig.onPreInit returns null but should return the modified config.', 'factoryConfig.preInit.isNull')
         throwErrorIf(typeof config !== 'object', 'pluginize(config,factoryConfig): factoryConfig.onPreInit returns a ' + typeof entry + 'but should return an object.', 'factoryConfig.preInit.wrongType')
