@@ -1,21 +1,66 @@
-const { pluginize } = require('pluginize');
+const FeatureTogglePlugin = {
+    name: "FeatureTogglePlugin",
+    // Returns key featureToggle - we define it in onInit()
+    return: 'featureToggle',
 
-const myLibrary = pluginize({
-    xonInit(config, pluginConfig, context) {
-        //1st way to add sth in the context - modify the context object
-        context.sayHelloDefault = function() {
-            console.log('hello ' + config.name);
+    /*
+        Here we map 
+        {
+            featurea: true,
+            featureb: false,
+            featurec: true
         }
-
-        //2nd way: every attribute returned will be added to the context
+        to
+        {
+            data: {
+                featurea: true,
+                featureb: false,
+                featurec: true
+            }
+        } 
+    */
+    onPreInit(config) {
         return {
-            sayHello(name) {
-                console.log('hello ' + name);
+            data: config
+        }
+    },
+    /**
+     * Here we define the library that will be returned
+     * @param {*} config 
+     */
+    onInit(config) {
+        return {
+            featureToggle: {
+                data: config.data,
+                isActive: function(key) { return config.data[key] }
             }
         }
     },
+    // we must allow key "data" because we use it in hook onPreInit()
+    allowKeys: ['data'],
+};
+
+const featureToggle = pluginize({
+    name: 'FeatureToggle',
+    debug: true,
+
+    plugins: [FeatureTogglePlugin]
 });
 
-//now our result includes these two functions
-const result = myLibrary.run({ name: 'heinrich' });
-//console.log(result.name)
+/**
+ * Will return an object {
+ *  data: {
+ *      featurea: true,
+ *      featureb: false,
+ *      featurec: true
+ *  },
+ *  isActive: function(){}
+ * }
+ */
+const result = featureToggle({
+    featurea: true,
+    featureb: false,
+    featurec: true
+}).run();
+
+console.log(result);
