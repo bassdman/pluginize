@@ -75,18 +75,13 @@ module.exports = function(config) {
            the ES6+ code in the test files readable to the browser  
            eg. import, export keywords */
         webpack: {
-            mode: 'development',
-            module: {
-                rules: [{
-                    test: /\.js$/i,
-                    exclude: /(node_modules)/,
-                    loader: 'babel-loader',
-                    options: {
-                        presets: ['@babel/preset-env'],
-                        "plugins": ["@babel/plugin-transform-runtime"]
-                    }
-                }]
-            }
+            /* mode: 'development',
+             module: {
+                 rules: [{
+                     test: /\.js$/i,
+                     exclude: /(node_modules)/,
+                 }]
+             }*/
         },
         preprocessors: {
             //add webpack as preprocessor to support require() in test-suits .js files
