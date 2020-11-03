@@ -516,11 +516,8 @@ First, let's create a FeatureTogglePlugin
 ```javascript
 const FeatureTogglePlugin = {
     name: "FeatureTogglePlugin",
-    // Returns key featureToggle - we define it in onInit()
-    return: 'featureToggle',
-
     /*
-        Here we map {
+        Here we map the config{
             featurea: true,
             featureb: false,
             featurec: true
@@ -548,6 +545,8 @@ const FeatureTogglePlugin = {
             }
         }
     },
+    // Returns key featureToggle - we define it in onInit()
+    return: 'featureToggle',
     // we must allow key "data" because we use it in hook onPreInit()
     allowKeys: ['data'],
 };
@@ -582,5 +581,9 @@ const result = featureToggle({
     featurec: true
 }).run();
 ```
+
+## Create your own hooks
+When your Library becomes more complex, you may need your own hooks. 
+Luckily it is very easy to create new Hooks. 
 
 # Plugin Livecycle

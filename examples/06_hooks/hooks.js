@@ -63,4 +63,5 @@ const result = featureToggle({
     featurec: true
 }).run();
 
+
 console.log(result);

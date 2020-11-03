@@ -119,5 +119,57 @@ describe("examples", function() {
         }).runPromise();
 
         expect(result.isActive('featurea')).toBeTrue();
-    })
+    });
+
+    it("06_hooks-custom", async function() {
+        const FeatureTogglePlugin = {
+            name: "FeatureTogglePlugin",
+            return: 'featureToggle',
+            allowKeys: ['data', 'onFeatureChange'],
+            onPreInit(config) {
+                return {
+                    data: config
+                }
+            },
+            onInit(config, pluginConfig, ctx) {
+                return {
+                    featureToggle: {
+                        data: config.data,
+                        setFeature(name, value) {
+                            if (ctx.onFeatureChange) {
+                                ctx.onFeatureChange(name, value);
+                            }
+
+                            config.data[name] = value;
+                        },
+                        isActive: function(key) { return config.data[key] }
+                    }
+                }
+            },
+            onInitPlugin(config, ctx) {
+                if (config.onFeatureChange) {
+                    ctx.onFeatureChange = config.onFeatureChange;
+                }
+            }
+        };
+
+        const onFeatureChange = jasmine.createSpy('plugin')
+
+        const featureToggle = pluginize({
+            name: 'FeatureToggle',
+            debug: true,
+            onFeatureChange,
+            plugins: [FeatureTogglePlugin]
+        });
+
+        const result = featureToggle({
+            featurea: true,
+            featureb: false,
+            featurec: true
+        }).run();
+
+        result.setFeature('featured', true);
+
+        expect(onFeatureChange).toHaveBeenCalledWith('featured', true);
+    });
 })
